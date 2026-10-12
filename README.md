@@ -1,26 +1,46 @@
-# ⏳ Chrono-Compile: The Evolution of Programming Paradigms & Cognitive Load
+# Chrono-Compile: The Evolution of Programming Paradigms and Cognitive Load
 
 [![Unity](https://img.shields.io/badge/Unity-6000.0+-black?style=for-the-badge&logo=unity&logoColor=white)](https://unity.com/)
 [![C#](https://img.shields.io/badge/C%23-Code-239120?style=for-the-badge&logo=c-sharp&logoColor=white)](https://docs.microsoft.com/en-us/dotnet/csharp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An educational, time-traveling puzzle game developed as a Master's degree thesis project in **Computer Science at the University of Camerino**. 
+This repository contains the source code and assets for **Chrono-Compile**, an educational, time-traveling puzzle game developed as a Master's thesis project in Computer Science at the University of Camerino. 
 
-**Chrono-Compile** explores the evolution of programming paradigms from the 1960s to the AI-driven 2020s, analyzing how the shift in tools impacts human **cognitive load** (based on Leppink's cognitive load model) throughout programming history.
-
----
-
-## 🎮 Game Architecture & Levels
-
-The game is structured into four distinct chronological milestones, each shifting the cognitive burden from mechanical syntax memorization to high-level abstract logic and prompt engineering:
-
-*   **LV1 & LV2 (The Early Days):** Focuses on procedural logic and early sequential programming constraints.
-*   **LV3 (The 90s - Object-Oriented & Virtual Machines):** Introduces visual structured blocks, the Java Virtual Machine (WORA paradigm), and scoping mechanisms managed via `Livello3Manager.cs`.
-*   **LV4 (2020+ - AI & Prompt Engineering):** Replaces rigid syntax with a modern conversational interface mimicking AI assistants. Students learn to handle edge cases, ambiguity, and strict logical constraints using natural language via `Livello4Manager.cs`.
+The software investigates the historical evolution of software development paradigms—ranging from early procedural systems to modern AI-assisted workflows—and evaluates their impact on learners' cognitive load.
 
 ---
 
-## 📂 Project Structure
+## Background and Theoretical Framework
+
+### Game-Based Learning in Computer Science Education
+Game-Based Learning (GBL) integrates pedagogical frameworks into interactive environments to transform passive instruction into active problem-solving. In computer science education, foundational concepts such as syntax rules, control structures, and semantic constraints often impose significant barriers to entry. Chrono-Compile addresses this by embedding historical computational models into a chronological narrative, lowering initial friction while maintaining rigorous conceptual accuracy.
+
+### Cognitive Load Theory (Leppink's Model)
+The design of the simulation is grounded in Leppink's cognitive load model, focusing on the trade-offs between mental efforts during software learning:
+* **Extraneous Cognitive Load:** The cognitive overhead resulting from poor interface design, low-level instruction management, and rigid syntactic syntax (prominent in early paradigms).
+* **Intrinsic Cognitive Load:** The inherent difficulty associated with the problem domain itself (e.g., algorithmic logic and logical constraints), which shifts to the forefront as developer tools evolve.
+
+---
+
+## Evaluation and Empirical Testing
+
+To measure the educational efficacy of the application, an empirical testing phase is structured for high school curricula focused on Information Technology and Telecommunications:
+* **Research Objective:** To analyze whether a gamified, multi-era learning progression yields higher academic performance and reduces mental fatigue compared to traditional lecture methodologies.
+* **Methodology:** Administration of standardized cognitive load questionnaires based on Leppink's model, administered before and after student interaction with the software modules.
+
+---
+
+## System Architecture and Levels
+
+The game is divided into four sequential chronological stages managed via modular C# controllers:
+
+1. **LV1 & LV2 (The Early Era):** Procedural logic and low-level instruction execution, emphasizing strict structural and syntactic constraints.
+2. **LV3 (The 1990s - Object-Oriented & Virtual Machines):** Implements visual structured blocks, the Java Virtual Machine architecture, and scoping mechanisms (`Livello3Manager.cs`).
+3. **LV4 (The 2020s - AI & Prompt Engineering):** Replaces traditional code composition with a conversational prompt interface (`Livello4Manager.cs`). This module highlights the modern paradigm shift: while syntactic burden is removed, managing ambiguity, logical constraints, and edge cases via natural language requires high-order analytical precision.
+
+---
+
+## Project Structure
 
 ```text
 Chrono-Compile/
@@ -29,16 +49,16 @@ Chrono-Compile/
 │   ├── Scenes/
 │   │   ├── LV1/
 │   │   │   └── Script/
-│   │   │       └── Livello1Manager.cs   #[cite: 3] Early procedural logic controller
+│   │   │       └── Livello1Manager.cs   # Procedural logic controller
 │   │   ├── LV2/
 │   │   │   └── Script/
-│   │   │       └── Livello2Manager.cs   #[cite: 3] Intermediate mechanics controller
+│   │   │       └── Livello2Manager.cs   # Intermediate execution controller
 │   │   ├── LV3/
 │   │   │   └── Script/
-│   │   │       └── Livello3Manager.cs   #[cite: 3] 90s JVM & visual blocks engine
+│   │   │       └── Livello3Manager.cs   # JVM and visual block evaluation engine
 │   │   └── LV4/
 │   │       └── Script/
-│   │           └── Livello4Manager.cs   #[cite: 3] Modern AI chat & prompt validation engine
+│   │           └── Livello4Manager.cs   # Natural language prompt validation engine
 │   │
 │   ├── TextMeshPro/
 │   └── Settings/
