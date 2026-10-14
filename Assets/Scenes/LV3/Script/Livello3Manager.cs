@@ -94,31 +94,33 @@ public class Livello3Manager : MonoBehaviour
         ImpostaFase();
     }
 
-    IEnumerator EffettoFadeIn()
+IEnumerator EffettoFadeIn()
     {
         inTransizione = true;
-        
         if (pannelloTransizione != null)
         {
             pannelloTransizione.gameObject.SetActive(true);
-            pannelloTransizione.raycastTarget = true;
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 1f); 
+            pannelloTransizione.raycastTarget = true; 
+            
+            // Inizia completamente NERO
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f); 
 
-            float durataFade = 2.0f; 
+            float durataFade = 2.0f;
             float tempoInizio = Time.time;
 
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(1f, 1f, 1f, 1f - t); 
+                // L'opacità scende gradualmente: 1f - t
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - t); 
                 yield return null;
             }
 
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 0f);
-            pannelloTransizione.raycastTarget = false; 
+            // Finisce trasparente
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
+            pannelloTransizione.raycastTarget = false;
             pannelloTransizione.gameObject.SetActive(false);
         }
-        
         inTransizione = false;
     }
 
@@ -140,6 +142,48 @@ public class Livello3Manager : MonoBehaviour
             else if (taskCorrente == StatoTask.Difficile)
                 logConsole.text = "> JVM READY.\n> Chiudi la logica nello SCOPE del LOOP. Premi INVIO per il test finale.";
         }
+    }
+    
+// ==========================================
+    // RITORNO AL MENU PRINCIPALE CON ANIMAZIONE
+    // ==========================================
+    public void TornaAlMenu()
+    {
+        // Se c'è già un'animazione in corso o il gioco è finito, ignora il clic
+        if (inTransizione) return; 
+        
+        StartCoroutine(EffettoFadeMenu());
+    }
+
+   IEnumerator EffettoFadeMenu()
+    {
+        inTransizione = true;
+
+        if (pannelloTransizione != null)
+        {
+            pannelloTransizione.gameObject.SetActive(true);
+            pannelloTransizione.raycastTarget = true; // Blocca i clic sullo schermo
+            
+            // 1. Inizia NERO TRASPARENTE (alpha = 0)
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f); 
+            
+            float durataFade = 1.0f; // Durata del caricamento (1 secondo)
+            float tempoInizio = Time.time;
+
+            while (Time.time < tempoInizio + durataFade)
+            {
+                float t = (Time.time - tempoInizio) / durataFade;
+                // 2. L'alpha sale gradualmente con 't'
+                pannelloTransizione.color = new Color(0f, 0f, 0f, t); 
+                yield return null;
+            }
+            
+            // 3. Finisce NERO OPACO (alpha = 1)
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
+        }
+
+        yield return new WaitForSeconds(0.2f); // Piccola pausa scenica prima di caricare
+        SceneManager.LoadScene("Menu"); 
     }
 
     public void CliccatoSlot(int indice)
@@ -428,7 +472,7 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
         {
             pannelloTransizione.gameObject.SetActive(true);
             pannelloTransizione.raycastTarget = true;
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 0f);
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
             
             float durataFade = 2.5f;
             float tempoInizio = Time.time;
@@ -436,10 +480,10 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(1f, 1f, 1f, t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 0f - t);  
                 yield return null;
             }
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 1f);
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
         }
 
         yield return new WaitForSeconds(1.0f);

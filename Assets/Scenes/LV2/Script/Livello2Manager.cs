@@ -61,22 +61,30 @@ public class Livello2Manager : MonoBehaviour
     IEnumerator EffettoFadeIn()
     {
         inTransizione = true;
-        pannelloTransizione.gameObject.SetActive(true);
-        pannelloTransizione.raycastTarget = true;
-
-        float durataFade = 2.5f; 
-        float tempoInizio = Time.time;
-
-        while (Time.time < tempoInizio + durataFade)
+        if (pannelloTransizione != null)
         {
-            float t = (Time.time - tempoInizio) / durataFade;
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 1f - t); 
-            yield return null;
-        }
+            pannelloTransizione.gameObject.SetActive(true);
+            pannelloTransizione.raycastTarget = true; 
+            
+            // Inizia completamente NERO
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f); 
 
-        pannelloTransizione.color = new Color(1f, 1f, 1f, 0f);
-        pannelloTransizione.raycastTarget = false; 
-        pannelloTransizione.gameObject.SetActive(false);
+            float durataFade = 2.0f;
+            float tempoInizio = Time.time;
+
+            while (Time.time < tempoInizio + durataFade)
+            {
+                float t = (Time.time - tempoInizio) / durataFade;
+                // L'opacità scende gradualmente: 1f - t
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - t); 
+                yield return null;
+            }
+
+            // Finisce trasparente
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
+            pannelloTransizione.raycastTarget = false;
+            pannelloTransizione.gameObject.SetActive(false);
+        }
         inTransizione = false;
     }
 
@@ -170,7 +178,7 @@ public class Livello2Manager : MonoBehaviour
         {
             pannelloTransizione.gameObject.SetActive(true);
             pannelloTransizione.raycastTarget = true;
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 0f);
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
             
             float durataFade = 2.5f;
             float tempoInizio = Time.time;
@@ -178,18 +186,59 @@ public class Livello2Manager : MonoBehaviour
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(1f, 1f, 1f, t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 0f - t); 
                 yield return null;
             }
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 1f);
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
         }
-
         yield return new WaitForSeconds(1.0f);
         
         // CARICAMENTO EFFETTIVO DELLA SCENA DEL LIVELLO 3
         SceneManager.LoadScene("LV3");
     }
 
+// ==========================================
+    // RITORNO AL MENU PRINCIPALE CON ANIMAZIONE
+    // ==========================================
+    public void TornaAlMenu()
+    {
+        // Se c'è già un'animazione in corso o il gioco è finito, ignora il clic
+        if (inTransizione) return; 
+        
+        StartCoroutine(EffettoFadeMenu());
+    }
+
+    IEnumerator EffettoFadeMenu()
+    {
+        inTransizione = true;
+
+        if (pannelloTransizione != null)
+        {
+            pannelloTransizione.gameObject.SetActive(true);
+            pannelloTransizione.raycastTarget = true; // Blocca i clic sullo schermo
+            
+            // 1. Inizia NERO TRASPARENTE (alpha = 0)
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f); 
+            
+            float durataFade = 1.0f; // Durata del caricamento (1 secondo)
+            float tempoInizio = Time.time;
+
+            while (Time.time < tempoInizio + durataFade)
+            {
+                float t = (Time.time - tempoInizio) / durataFade;
+                // 2. L'alpha sale gradualmente con 't'
+                pannelloTransizione.color = new Color(0f, 0f, 0f, t); 
+                yield return null;
+            }
+            
+            // 3. Finisce NERO OPACO (alpha = 1)
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
+        }
+
+        yield return new WaitForSeconds(0.2f); // Piccola pausa scenica prima di caricare
+        SceneManager.LoadScene("Menu"); 
+    }
+    
     // --- FASE 1: FACILE ---
     public void CliccatoRigaFacile()
     {

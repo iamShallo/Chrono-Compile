@@ -15,9 +15,9 @@ public class Livello1Manager : MonoBehaviour
 
     [Header("Barra e Transizione")]
     public Image barraTemporaleFill; 
-    public Image pannelloTransizione; 
     public GameObject contenitoreBarraTemporale; 
     public GameObject contenitoreObiettivo;       
+    public Image pannelloTransizione; 
 
     [Header("Pulsante SUBMIT")]
     public Button bottoneSubmit;
@@ -52,13 +52,6 @@ public class Livello1Manager : MonoBehaviour
         if (immagineBottoneSubmit != null) 
             coloreOriginaleSubmit = immagineBottoneSubmit.color;
 
-        if (pannelloTransizione != null)
-        {
-            pannelloTransizione.gameObject.SetActive(true);
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 0f);
-            pannelloTransizione.raycastTarget = false;
-        }
-
         if (levaStatus != null)
         {
             levaStatus.interactable = true;
@@ -70,6 +63,9 @@ public class Livello1Manager : MonoBehaviour
 
         if (schermoTerminale != null) 
             schermoTerminale.text = ""; 
+
+        // Avvia direttamente il Fade-In NERO all'inizio
+        if (pannelloTransizione != null) StartCoroutine(EffettoFadeIn());   
     }
 
     public void ValutaInterruttori()
@@ -282,6 +278,7 @@ public class Livello1Manager : MonoBehaviour
         }
     }
 
+    // Animazione di Vittoria e cambio livello
     IEnumerator EffettoViaggioNelTempo()
     {
         inTransizione = true;
@@ -295,7 +292,7 @@ public class Livello1Manager : MonoBehaviour
         {
             pannelloTransizione.gameObject.SetActive(true);
             pannelloTransizione.raycastTarget = true; 
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 0f);
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
 
             float durataFade = 2.5f;
             float tempoInizio = Time.time;
@@ -303,16 +300,47 @@ public class Livello1Manager : MonoBehaviour
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(1f, 1f, 1f, t);
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 0f - t); // Questo fade a bianco rimane per il viaggio nel tempo
                 yield return null;
             }
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 1f);
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
         }
 
         yield return new WaitForSeconds(0.5f);
         SceneManager.LoadScene("LV2"); 
     }
 
+    // Fade-in nero iniziale 
+IEnumerator EffettoFadeIn()
+    {
+        inTransizione = true;
+        if (pannelloTransizione != null)
+        {
+            pannelloTransizione.gameObject.SetActive(true);
+            pannelloTransizione.raycastTarget = true; 
+            
+            // Inizia completamente NERO
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f); 
+
+            float durataFade = 2.0f;
+            float tempoInizio = Time.time;
+
+            while (Time.time < tempoInizio + durataFade)
+            {
+                float t = (Time.time - tempoInizio) / durataFade;
+                // L'opacità scende gradualmente: 1f - t
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - t); 
+                yield return null;
+            }
+
+            // Finisce trasparente
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
+            pannelloTransizione.raycastTarget = false;
+            pannelloTransizione.gameObject.SetActive(false);
+        }
+        inTransizione = false;
+    }
+    
     IEnumerator AvanzaBarraTemporale(float targetValue)
     {
         if (barraTemporaleFill == null) yield break;
@@ -359,10 +387,8 @@ public class Livello1Manager : MonoBehaviour
         if (levaLoopExecute != null) levaLoopExecute.SetIsOnWithoutNotify(false);
     }
 
-    // === FIX HELP LIVELLO 1 ===
     public void ApriHelp()
     {
-        // Rimosso il blocco dello schermo spento. L'help si apre sempre tranne durante il cambio livello.
         if (inTransizione && livelloCompletato) return; 
         
         if (pannelloHelp == null || testoHelp == null) return;
@@ -380,6 +406,44 @@ public class Livello1Manager : MonoBehaviour
                 testoHelp.text = "MANUALE OPERATIVO - FASE 3 (L'Accumulatore)\n\nGUIDA:\nConfigura i parametri di incremento e lascia che l'hardware esegua iterazioni multiple accumulando i risultati parziali in memoria.\n\nCENNI STORICI:\nPrima dei linguaggi evoluti, i cicli ripetitivi venivano gestiti salvando temporaneamente i totali parziali in registri dedicati chiamati appunto 'Accumulatori'.";
                 break;
         }
+    }
+    
+    // Ritorno al menu sfumando a NERO
+    public void TornaAlMenu()
+    {
+        if (inTransizione) return; 
+        StartCoroutine(EffettoFadeMenu());
+    }
+
+   IEnumerator EffettoFadeMenu()
+    {
+        inTransizione = true;
+
+        if (pannelloTransizione != null)
+        {
+            pannelloTransizione.gameObject.SetActive(true);
+            pannelloTransizione.raycastTarget = true; // Blocca i clic sullo schermo
+            
+            // 1. Inizia NERO TRASPARENTE (alpha = 0)
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f); 
+            
+            float durataFade = 1.0f; // Durata del caricamento (1 secondo)
+            float tempoInizio = Time.time;
+
+            while (Time.time < tempoInizio + durataFade)
+            {
+                float t = (Time.time - tempoInizio) / durataFade;
+                // 2. L'alpha sale gradualmente con 't'
+                pannelloTransizione.color = new Color(0f, 0f, 0f, t); 
+                yield return null;
+            }
+            
+            // 3. Finisce NERO OPACO (alpha = 1)
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
+        }
+
+        yield return new WaitForSeconds(0.2f); // Piccola pausa scenica prima di caricare
+        SceneManager.LoadScene("Menu"); 
     }
 
     public void ChiudiHelp()

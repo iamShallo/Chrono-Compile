@@ -26,7 +26,7 @@ public class Livello4Manager : MonoBehaviour
     [Header("Meta-Gioco (UI)")]
     public Image pannelloTransizione;
     public Image barraTemporaleFill;
-    public string nomeScenaSuccessiva = "SchermataVittoria";
+    public string nomeScenaSuccessiva = "Fine";
 
     [Header("Interfaccia Obiettivi")]
     public TextMeshProUGUI testoObiettivo;
@@ -61,15 +61,16 @@ public class Livello4Manager : MonoBehaviour
         AggiornaInterfacciaMetaGioco();
     }
 
-    IEnumerator EffettoFadeIn()
+IEnumerator EffettoFadeIn()
     {
         inTransizione = true;
         if (pannelloTransizione != null)
         {
             pannelloTransizione.gameObject.SetActive(true);
-            pannelloTransizione.raycastTarget = true;
-            // COLORE BIANCO (1,1,1) al posto del nero (0,0,0)
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 1f); 
+            pannelloTransizione.raycastTarget = true; 
+            
+            // Inizia completamente NERO
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f); 
 
             float durataFade = 2.0f;
             float tempoInizio = Time.time;
@@ -77,11 +78,13 @@ public class Livello4Manager : MonoBehaviour
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(1f, 1f, 1f, 1f - t);
+                // L'opacità scende gradualmente: 1f - t
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - t); 
                 yield return null;
             }
 
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 0f);
+            // Finisce trasparente
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
             pannelloTransizione.raycastTarget = false;
             pannelloTransizione.gameObject.SetActive(false);
         }
@@ -311,7 +314,7 @@ public class Livello4Manager : MonoBehaviour
         }
     }
 
-    IEnumerator EffettoViaggioNelTempoUscita()
+   IEnumerator EffettoViaggioNelTempoUscita()
     {
         inTransizione = true;
         testoTerminale.text = "> SALVATAGGIO PROGRESSI...\n> USCITA DALLA SIMULAZIONE IN CORSO.";
@@ -320,8 +323,9 @@ public class Livello4Manager : MonoBehaviour
         {
             pannelloTransizione.gameObject.SetActive(true);
             pannelloTransizione.raycastTarget = true;
-            // COLORE BIANCO per l'uscita
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 0f);
+            
+            // 1. Inizia NERO TRASPARENTE (alpha = 0)
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
             
             float durataFade = 2.5f;
             float tempoInizio = Time.time;
@@ -329,10 +333,13 @@ public class Livello4Manager : MonoBehaviour
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(1f, 1f, 1f, t); 
+                // 2. L'alpha sale gradualmente con 't', diventando sempre più opaco
+                pannelloTransizione.color = new Color(0f, 0f, 0f, t); 
                 yield return null;
             }
-            pannelloTransizione.color = new Color(1f, 1f, 1f, 1f);
+            
+            // 3. Finisce NERO OPACO al 100% (alpha = 1)
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
         }
 
         yield return new WaitForSeconds(1.0f);
@@ -387,5 +394,47 @@ public class Livello4Manager : MonoBehaviour
         }
     }
     
+// ==========================================
+    // RITORNO AL MENU PRINCIPALE CON ANIMAZIONE
+    // ==========================================
+    public void TornaAlMenu()
+    {
+        // Se c'è già un'animazione in corso o il gioco è finito, ignora il clic
+        if (inTransizione) return; 
+        
+        StartCoroutine(EffettoFadeMenu());
+    }
+
+IEnumerator EffettoFadeMenu()
+    {
+        inTransizione = true;
+
+        if (pannelloTransizione != null)
+        {
+            pannelloTransizione.gameObject.SetActive(true);
+            pannelloTransizione.raycastTarget = true; // Blocca i clic sullo schermo
+            
+            // 1. Inizia NERO TRASPARENTE (alpha = 0)
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f); 
+            
+            float durataFade = 1.0f; // Durata del caricamento (1 secondo)
+            float tempoInizio = Time.time;
+
+            while (Time.time < tempoInizio + durataFade)
+            {
+                float t = (Time.time - tempoInizio) / durataFade;
+                // 2. L'alpha sale gradualmente con 't'
+                pannelloTransizione.color = new Color(0f, 0f, 0f, t); 
+                yield return null;
+            }
+            
+            // 3. Finisce NERO OPACO (alpha = 1)
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
+        }
+
+        yield return new WaitForSeconds(0.2f); // Piccola pausa scenica prima di caricare
+        SceneManager.LoadScene("Menu"); 
+    }
+
     public void ChiudiHelp() { if (pannelloHelp) pannelloHelp.SetActive(false); }
 }
