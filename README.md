@@ -17,26 +17,28 @@ Game-Based Learning (GBL) integrates pedagogical frameworks into interactive env
 
 ### Cognitive Load Theory (Leppink's Model)
 The design of the simulation is grounded in Leppink's cognitive load model, focusing on the trade-offs between mental efforts during software learning:
-* **Extraneous Cognitive Load:** The cognitive overhead resulting from poor interface design, low-level instruction management, and rigid syntactic syntax (prominent in early paradigms).
-* **Intrinsic Cognitive Load:** The inherent difficulty associated with the problem domain itself (e.g., algorithmic logic and logical constraints), which shifts to the forefront as developer tools evolve.
+- **Extraneous Cognitive Load:** The cognitive overhead resulting from poor interface design, low-level instruction management, and rigid syntactic syntax (prominent in early paradigms).
+- **Intrinsic Cognitive Load:** The inherent difficulty associated with the problem domain itself (e.g., algorithmic logic and logical constraints), which shifts to the forefront as developer tools evolve.
 
 ---
 
 ## Evaluation and Empirical Testing
 
 To measure the educational efficacy of the application, an empirical testing phase is structured for high school curricula focused on Information Technology and Telecommunications:
-* **Research Objective:** To analyze whether a gamified, multi-era learning progression yields higher academic performance and reduces mental fatigue compared to traditional lecture methodologies.
-* **Methodology:** Administration of standardized cognitive load questionnaires based on Leppink's model, administered before and after student interaction with the software modules.
+- **Research Objective:** To analyze whether a gamified, multi-era learning progression yields higher academic performance and reduces mental fatigue compared to traditional lecture methodologies.
+- **Methodology:** Administration of standardized cognitive load questionnaires based on Leppink's model, administered before and after student interaction with the software modules.
 
 ---
 
 ## System Architecture and Levels
 
-The game is divided into four sequential chronological stages managed via modular C# controllers:
+The application flow is managed via modular C# controllers and structured across distinct scenes:
 
-1. **LV1 & LV2 (The Early Era):** Procedural logic and low-level instruction execution, emphasizing strict structural and syntactic constraints.
-2. **LV3 (The 1990s - Object-Oriented & Virtual Machines):** Implements visual structured blocks, the Java Virtual Machine architecture, and scoping mechanisms (`Livello3Manager.cs`).
-3. **LV4 (The 2020s - AI & Prompt Engineering):** Replaces traditional code composition with a conversational prompt interface (`Livello4Manager.cs`). This module highlights the modern paradigm shift: while syntactic burden is removed, managing ambiguity, logical constraints, and edge cases via natural language requires high-order analytical precision.
+1. **Menu Scene (`Menu`):** The main entry point featuring dynamic background switching, level selection, options, and direct integration with the thesis data-collection form.
+2. **LV1 & LV2 (The Early Era):** Procedural logic and low-level instruction execution, emphasizing strict structural and syntactic constraints (`Livello1Manager.cs`, `Livello2Manager.cs`).
+3. **LV3 (The 1990s - Object-Oriented & Virtual Machines):** Implements visual structured blocks, the Java Virtual Machine architecture, and scoping mechanisms (`Livello3Manager.cs`).
+4. **LV4 (The 2020s - AI & Prompt Engineering):** Replaces traditional code composition with a conversational prompt interface (`Livello4Manager.cs`), focusing on high-order analytical precision and edge-case handling via natural language.
+5. **Final Scene (`Fine`):** The concluding victory screen (`FineManager.cs`) acknowledging the completion of the time-traveling journey and providing direct access to the thesis Google Form for empirical evaluation.
 
 ---
 
@@ -47,6 +49,9 @@ Chrono-Compile/
 │
 ├── Assets/
 │   ├── Scenes/
+│   │   ├── Menu/
+│   │   │   └── Script/
+│   │   │       └── MenuManager.cs       # Main menu and navigation controller
 │   │   ├── LV1/
 │   │   │   └── Script/
 │   │   │       └── Livello1Manager.cs   # Procedural logic controller
@@ -56,9 +61,12 @@ Chrono-Compile/
 │   │   ├── LV3/
 │   │   │   └── Script/
 │   │   │       └── Livello3Manager.cs   # JVM and visual block evaluation engine
-│   │   └── LV4/
+│   │   ├── LV4/
+│   │   │   └── Script/
+│   │   │       └── Livello4Manager.cs   # Natural language prompt validation engine
+│   │   └── Fine/
 │   │       └── Script/
-│   │           └── Livello4Manager.cs   # Natural language prompt validation engine
+│   │           └── FineManager.cs       # Conclusion and feedback form controller
 │   │
 │   ├── TextMeshPro/
 │   └── Settings/
