@@ -35,14 +35,24 @@ public class Livello4Manager : MonoBehaviour
     public GameObject pannelloHelp;
     public TextMeshProUGUI testoHelp;
 
+    [Header("Effetto Shake")]
+    public RectTransform pannelloDaScuotere;
+
+    [Header("Debriefing")]
+    public TextMeshProUGUI testoDebriefing;
+    [TextArea] public string fraseDebriefing = "Era finale: la sintassi e' scomparsa. La precisione ora vive nelle domande.";
+
     [Header("Tasto SUBMIT (Fine Gioco)")]
     public Button bottoneSubmit;
     public Image immagineBottoneSubmit;
     private Color coloreOriginaleSubmit;
     private Coroutine lampeggioVerdeCoroutine;
+    private Coroutine animazioneHelp;
 
     private bool attesaIA = false;
     private bool primoMessaggioInviato = false;
+    private int erroriPromptConsecutivi = 0;
+    private StatoTask faseUltimoErrore;
 
     void Start()
     {
@@ -79,7 +89,7 @@ IEnumerator EffettoFadeIn()
             {
                 float t = (Time.time - tempoInizio) / durataFade;
                 // L'opacità scende gradualmente: 1f - t
-                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - Mathf.Clamp01(t)); 
                 yield return null;
             }
 
@@ -137,6 +147,25 @@ IEnumerator EffettoFadeIn()
         StartCoroutine(ScrollaInBasso());
     }
 
+    IEnumerator AggiungiMessaggioChatTypewriter(string mittente, string messaggio, string coloreHex)
+    {
+        testoChat.text += $"\n<color={coloreHex}><b>{mittente}:</b></color>\n";
+        bool isTag = false;
+        foreach (char carattere in messaggio)
+        {
+            if (carattere == '<') isTag = true;
+            testoChat.text += carattere;
+            if (carattere == '>') isTag = false;
+            if (!isTag)
+            {
+                StartCoroutine(ScrollaInBasso());
+                yield return new WaitForSeconds(0.015f);
+            }
+        }
+        testoChat.text += "\n";
+        StartCoroutine(ScrollaInBasso());
+    }
+
     // Il fix del "doppio frame" per far funzionare lo scroll
     IEnumerator ScrollaInBasso()
     {
@@ -169,18 +198,20 @@ IEnumerator EffettoFadeIn()
             {
                 if (prompt.Contains("due") || prompt.Contains("2"))
                 {
-                    AggiungiMessaggioChat("Gemini", "Certamente, ecco il codice Python per eseguire un'addizione di due variabili:", "#55aaff");
-                    GeneraCodice("def somma(a, b):\n    return a + b\n\nprint(somma(5, 3))");
+                    yield return StartCoroutine(AggiungiMessaggioChatTypewriter("Gemini", "Certamente, ecco il codice Python per eseguire un'addizione di due variabili:", "#55aaff"));
+                    yield return StartCoroutine(GeneraCodiceAnimato("def somma(a, b):\n    return a + b\n\nprint(somma(5, 3))"));
                     yield return StartCoroutine(EseguiTerminale("> RUN: script.py\n> OUTPUT: 8\n> TEST COMPLETATO CON SUCCESSO.", true));
                 }
                 else
                 {
-                    AggiungiMessaggioChat("Gemini", "Hai chiesto una somma, ma il tuo prompt è ambiguo. Quanti numeri devo sommare? Specifica 'due numeri'.", "#55aaff");
+                    SegnalaPromptNonValido("due numeri");
+                    yield return StartCoroutine(AggiungiMessaggioChatTypewriter("Gemini", "Hai chiesto una somma, ma il tuo prompt è ambiguo. Quanti numeri devo sommare? Specifica 'due numeri'.", "#55aaff"));
                 }
             }
             else
             {
-                AggiungiMessaggioChat("Gemini", "Non posso aiutarti su questo ora. Il tuo obiettivo attuale è generare una funzione di **somma**.", "#55aaff");
+                SegnalaPromptNonValido("somma di due numeri");
+                yield return StartCoroutine(AggiungiMessaggioChatTypewriter("Gemini", "Non posso aiutarti su questo ora. Il tuo obiettivo attuale è generare una funzione di **somma**.", "#55aaff"));
             }
         }
         // --- FASE 2: MEDIA ---
@@ -190,20 +221,22 @@ IEnumerator EffettoFadeIn()
             {
                 if (prompt.Contains("zero") || prompt.Contains("errore") || prompt.Contains("eccezione") || prompt.Contains("0"))
                 {
-                    AggiungiMessaggioChat("Gemini", "Ottima richiesta. Ho generato il codice includendo il blocco Try/Except per gestire la divisione per zero in sicurezza.", "#55aaff");
-                    GeneraCodice("def dividi(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return 'Errore: div per zero'\n\nprint(dividi(10, 0))");
+                    yield return StartCoroutine(AggiungiMessaggioChatTypewriter("Gemini", "Ottima richiesta. Ho generato il codice includendo il blocco Try/Except per gestire la divisione per zero in sicurezza.", "#55aaff"));
+                    yield return StartCoroutine(GeneraCodiceAnimato("def dividi(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return 'Errore: div per zero'\n\nprint(dividi(10, 0))"));
                     yield return StartCoroutine(EseguiTerminale("> RUN: script.py\n> OUTPUT: Errore: div per zero\n> ECCEZIONE GESTITA. TEST SUPERATO.", true));
                 }
                 else
                 {
-                    AggiungiMessaggioChat("Gemini", "Ecco una funzione base per la divisione:", "#55aaff");
-                    GeneraCodice("def dividi(a, b):\n    return a / b\n\nprint(dividi(10, 0))");
+                    yield return StartCoroutine(AggiungiMessaggioChatTypewriter("Gemini", "Ecco una funzione base per la divisione:", "#55aaff"));
+                    SegnalaPromptNonValido("gestire l'errore zero");
+                    yield return StartCoroutine(GeneraCodiceAnimato("def dividi(a, b):\n    return a / b\n\nprint(dividi(10, 0))", true));
                     yield return StartCoroutine(EseguiTerminale("> RUN: script.py\n> <color=#FF3333>ZeroDivisionError: division by zero</color>\n> CRASH DI SISTEMA. Hai omesso le istruzioni sull'errore nel prompt.", false));
                 }
             }
             else
             {
-                AggiungiMessaggioChat("Gemini", "Restiamo concentrati. Per favore, chiedimi di eseguire una **divisione**.", "#55aaff");
+                SegnalaPromptNonValido("divisione con gestione dello zero");
+                yield return StartCoroutine(AggiungiMessaggioChatTypewriter("Gemini", "Restiamo concentrati. Per favore, chiedimi di eseguire una **divisione**.", "#55aaff"));
             }
         }
         // --- FASE 3: DIFFICILE ---
@@ -213,29 +246,62 @@ IEnumerator EffettoFadeIn()
             {
                 if (prompt.Contains("10") || prompt.Contains("100") || prompt.Contains("array") || prompt.Contains("lista") || prompt.Contains("limite"))
                 {
-                    AggiungiMessaggioChat("Gemini", "Perfetto. Ho creato un ciclo con un limite quantitativo preciso, in modo da evitare sovraccarichi.", "#55aaff");
-                    GeneraCodice("for i in range(10):\n    print('Elaborazione:', i)\n\nprint('Ciclo terminato correttamente.')");
+                    yield return StartCoroutine(AggiungiMessaggioChatTypewriter("Gemini", "Perfetto. Ho creato un ciclo con un limite quantitativo preciso, in modo da evitare sovraccarichi.", "#55aaff"));
+                    yield return StartCoroutine(GeneraCodiceAnimato("for i in range(10):\n    print('Elaborazione:', i)\n\nprint('Ciclo terminato correttamente.')"));
                     yield return StartCoroutine(EseguiTerminale("> RUN: script.py\n> OUTPUT: Ciclo 0... 9\n> TEST SUPERATO IN SICUREZZA.", true));
                 }
                 else
                 {
-                    AggiungiMessaggioChat("Gemini", "Nessun limite specificato. Eseguo un ciclo indefinito come da tue istruzioni:", "#55aaff");
-                    GeneraCodice("while True:\n    print('Ciclo in esecuzione...')\n");
+                    yield return StartCoroutine(AggiungiMessaggioChatTypewriter("Gemini", "Nessun limite specificato. Eseguo un ciclo indefinito come da tue istruzioni:", "#55aaff"));
+                    SegnalaPromptNonValido("ciclo for con limite 10");
+                    yield return StartCoroutine(GeneraCodiceAnimato("while True:\n    print('Ciclo in esecuzione...')\n", true));
                     yield return StartCoroutine(EseguiTerminale("> RUN: script.py\n> <color=#FF3333>FATAL ERROR: OUT OF MEMORY (Infinite Loop Detected)</color>\n> L'IA richiede parametri quantitativi esatti.", false));
                 }
             }
             else
             {
-                AggiungiMessaggioChat("Gemini", "Ho bisogno che tu specifichi chiaramente la generazione di un **ciclo** o un loop.", "#55aaff");
+                SegnalaPromptNonValido("ciclo for con un limite");
+                yield return StartCoroutine(AggiungiMessaggioChatTypewriter("Gemini", "Ho bisogno che tu specifichi chiaramente la generazione di un **ciclo** o un loop.", "#55aaff"));
             }
         }
 
         attesaIA = false;
     }
 
-    void GeneraCodice(string codice)
+    IEnumerator GeneraCodiceAnimato(string codice, bool contieneBug = false)
     {
-        testoCodiceGenerato.text = $"<color=#00FF66>{codice}</color>";
+        if (testoCodiceGenerato == null) yield break;
+        testoCodiceGenerato.text = "";
+        foreach (string riga in codice.Split('\n'))
+        {
+            testoCodiceGenerato.text += $"<color=#00FF66>{riga}</color>\n";
+            yield return new WaitForSeconds(0.15f);
+        }
+        if (contieneBug)
+        {
+            yield return new WaitForSeconds(1.2f);
+            testoCodiceGenerato.text = $"<color=#FF3333>{codice}\n\n# &lt;-- BUG CRITICO GENERATO DALL'IA!</color>";
+        }
+    }
+
+    void SegnalaPromptNonValido(string suggerimento)
+    {
+        if (faseUltimoErrore != taskCorrente)
+        {
+            faseUltimoErrore = taskCorrente;
+            erroriPromptConsecutivi = 0;
+        }
+        erroriPromptConsecutivi++;
+        if (erroriPromptConsecutivi >= 2)
+            AggiornaSuggerimentoInput(suggerimento);
+    }
+
+    void AggiornaSuggerimentoInput(string suggerimento)
+    {
+        if (campoPrompt == null || campoPrompt.placeholder == null) return;
+        TextMeshProUGUI testoPlaceholder = campoPrompt.placeholder.GetComponent<TextMeshProUGUI>();
+        if (testoPlaceholder != null)
+            testoPlaceholder.text = $"<i>Suggerimento Chronos: prova a scrivere '{suggerimento}'...</i>";
     }
 
     IEnumerator EseguiTerminale(string output, bool successo)
@@ -246,6 +312,7 @@ IEnumerator EffettoFadeIn()
 
         if (successo)
         {
+            erroriPromptConsecutivi = 0;
             yield return new WaitForSeconds(3.5f);
             
             if (taskCorrente == StatoTask.Facile)
@@ -277,6 +344,8 @@ IEnumerator EffettoFadeIn()
         }
         else
         {
+            GameAnalytics.RegistraErrore();
+            StartCoroutine(EffettoScreenShake());
             yield return new WaitForSeconds(2.0f); 
         }
     }
@@ -317,6 +386,7 @@ IEnumerator EffettoFadeIn()
    IEnumerator EffettoViaggioNelTempoUscita()
     {
         inTransizione = true;
+       if (testoDebriefing != null) testoDebriefing.text = "";
         testoTerminale.text = "> SALVATAGGIO PROGRESSI...\n> USCITA DALLA SIMULAZIONE IN CORSO.";
 
         if (pannelloTransizione != null)
@@ -334,7 +404,7 @@ IEnumerator EffettoFadeIn()
             {
                 float t = (Time.time - tempoInizio) / durataFade;
                 // 2. L'alpha sale gradualmente con 't', diventando sempre più opaco
-                pannelloTransizione.color = new Color(0f, 0f, 0f, t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t)); 
                 yield return null;
             }
             
@@ -342,12 +412,43 @@ IEnumerator EffettoFadeIn()
             pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
         }
 
-        yield return new WaitForSeconds(1.0f);
+        yield return StartCoroutine(MostraDebriefing());
         
         if (!string.IsNullOrEmpty(nomeScenaSuccessiva))
         {
             SceneManager.LoadScene(nomeScenaSuccessiva);
         }
+
+    }
+
+    IEnumerator EffettoScreenShake(float durata = 0.25f, float intensita = 12f)
+    {
+        if (pannelloDaScuotere == null) yield break;
+        Vector2 posOriginale = pannelloDaScuotere.anchoredPosition;
+        float tempoTrascorso = 0f;
+        while (tempoTrascorso < durata)
+        {
+            pannelloDaScuotere.anchoredPosition = posOriginale +
+                new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)) * intensita;
+            tempoTrascorso += Time.deltaTime;
+            yield return null;
+        }
+        pannelloDaScuotere.anchoredPosition = posOriginale;
+    }
+
+    IEnumerator MostraDebriefing()
+    {
+        if (testoDebriefing == null)
+        {
+            yield return new WaitForSeconds(1f);
+            yield break;
+        }
+        foreach (char carattere in fraseDebriefing)
+        {
+            testoDebriefing.text += carattere;
+            yield return new WaitForSeconds(0.04f);
+        }
+        yield return new WaitForSeconds(2.5f);
     }
 
     IEnumerator FlashRosso(Image bottoneImg, Color coloreOriginale)
@@ -375,10 +476,13 @@ IEnumerator EffettoFadeIn()
 
     public void ApriHelp()
     {
+        GameAnalytics.RegistraAiuto();
         if (inTransizione) return; 
         if (pannelloHelp == null || testoHelp == null) return;
         
-        pannelloHelp.SetActive(true); 
+        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
+        pannelloHelp.SetActive(true);
+        animazioneHelp = StartCoroutine(AnimaApriHelp());
 
         switch (taskCorrente)
         {
@@ -424,7 +528,7 @@ IEnumerator EffettoFadeMenu()
             {
                 float t = (Time.time - tempoInizio) / durataFade;
                 // 2. L'alpha sale gradualmente con 't'
-                pannelloTransizione.color = new Color(0f, 0f, 0f, t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t)); 
                 yield return null;
             }
             
@@ -436,5 +540,53 @@ IEnumerator EffettoFadeMenu()
         SceneManager.LoadScene("Menu"); 
     }
 
-    public void ChiudiHelp() { if (pannelloHelp) pannelloHelp.SetActive(false); }
+    public void ChiudiHelp()
+    {
+        if (pannelloHelp == null) return;
+        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
+        animazioneHelp = StartCoroutine(AnimaChiudiHelp());
+    }
+
+    IEnumerator AnimaApriHelp()
+    {
+        RectTransform rect = pannelloHelp.GetComponent<RectTransform>();
+        CanvasGroup gruppo = pannelloHelp.GetComponent<CanvasGroup>();
+        if (rect == null) yield break;
+        if (gruppo == null) gruppo = pannelloHelp.AddComponent<CanvasGroup>();
+        rect.localScale = Vector3.one * 0.5f;
+        gruppo.alpha = 0f;
+        float tempo = 0f;
+        while (tempo < 0.25f)
+        {
+            tempo += Time.deltaTime;
+            float t = Mathf.Clamp01(tempo / 0.25f);
+            float curva = Mathf.Sin(t * Mathf.PI * 0.5f);
+            rect.localScale = Vector3.Lerp(Vector3.one * 0.5f, Vector3.one * 1.08f, curva);
+            gruppo.alpha = t;
+            yield return null;
+        }
+        rect.localScale = Vector3.one;
+        gruppo.alpha = 1f;
+    }
+
+    IEnumerator AnimaChiudiHelp()
+    {
+        RectTransform rect = pannelloHelp.GetComponent<RectTransform>();
+        CanvasGroup gruppo = pannelloHelp.GetComponent<CanvasGroup>();
+        if (rect == null) yield break;
+        if (gruppo == null) gruppo = pannelloHelp.AddComponent<CanvasGroup>();
+        Vector3 scalaIniziale = rect.localScale;
+        float tempo = 0f;
+        while (tempo < 0.15f)
+        {
+            tempo += Time.deltaTime;
+            float t = Mathf.Clamp01(tempo / 0.15f);
+            rect.localScale = Vector3.Lerp(scalaIniziale, Vector3.zero, t);
+            gruppo.alpha = 1f - t;
+            yield return null;
+        }
+        pannelloHelp.SetActive(false);
+        rect.localScale = Vector3.one;
+        gruppo.alpha = 1f;
+    }
 }

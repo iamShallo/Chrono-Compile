@@ -39,7 +39,16 @@ public class Livello1Manager : MonoBehaviour
     public GameObject pannelloHelp;
     public TextMeshProUGUI testoHelp;
 
-    private bool inTransizione = false; 
+    [Header("Effetto Shake")]
+    public RectTransform pannelloDaScuotere;
+
+    [Header("Debriefing")]
+    public TextMeshProUGUI testoDebriefing;
+    [TextArea] public string fraseDebriefing = "Prima era: la macchina eseguiva. Prossima era: il codice iniziera' a ricordare.";
+
+    private bool inTransizione = false;
+    private bool powerEraAttivo = false;
+    private Coroutine animazioneHelp;
 
     void Start()
     {
@@ -82,7 +91,18 @@ public class Livello1Manager : MonoBehaviour
         if (!levaStatus.isOn)
         {
             schermoTerminale.text = "";
+            powerEraAttivo = false;
             return;
+        }
+
+        if (levaPower != null && levaPower.isOn && !powerEraAttivo)
+        {
+            powerEraAttivo = true;
+            StartCoroutine(EffettoSfarfallioValvole());
+        }
+        else if (levaPower != null && !levaPower.isOn)
+        {
+            powerEraAttivo = false;
         }
 
         switch (taskCorrente)
@@ -95,8 +115,8 @@ public class Livello1Manager : MonoBehaviour
 
     void GestisciTaskFacile()
     {
-        if (levaOutput.isOn && !levaProcess.isOn) { StartCoroutine(MostraErrore("ERRORE HARDWARE:\nImpossibile stampare dati non elaborati. Aziona prima PROCESS.")); return; }
-        if (levaProcess.isOn && (!levaInputA.isOn || !levaInputB.isOn)) { StartCoroutine(MostraErrore("ERRORE ALU:\nRegistri vuoti. L'Unita' Aritmetica non puo' calcolare senza operandi.")); return; }
+        if (levaOutput.isOn && !levaProcess.isOn) { StartCoroutine(MostraErrore("[CHRONOS]: Ops! Le valvole del 1945 non possono stampare dati non elaborati. Azioniamo prima PROCESS.")); return; }
+        if (levaProcess.isOn && (!levaInputA.isOn || !levaInputB.isOn)) { StartCoroutine(MostraErrore("[CHRONOS]: I registri del 1945 hanno bisogno di entrambi gli operandi. Carichiamo INPUT A e INPUT B.")); return; }
         if ((levaInputA.isOn || levaInputB.isOn) && !levaPower.isOn) { StartCoroutine(MostraErrore("ERRORE DI SISTEMA:\nCircuiti non alimentati. Accendi il POWER.")); return; }
         if (levaLoopExecute.isOn) { StartCoroutine(MostraErrore("ERRORE:\nIl comando EXECUTE non e' richiesto in questa fase sequenziale.")); return; }
 
@@ -186,7 +206,7 @@ public class Livello1Manager : MonoBehaviour
         inTransizione = true; 
         schermoTerminale.text = "[HARDWARE OVERRIDE]\nAVVIO CICLO AUTOMATICO DELL'ACCUMULATORE...";
         
-        yield return new WaitForSeconds(3.0f); 
+        yield return new WaitForSeconds(1.5f); 
         levaInputA.SetIsOnWithoutNotify(false);
         levaInputB.SetIsOnWithoutNotify(false);
         levaProcess.SetIsOnWithoutNotify(false);
@@ -201,21 +221,21 @@ public class Livello1Manager : MonoBehaviour
             if (!levaStatus.isOn) { schermoTerminale.text = ""; inTransizione = false; yield break; }
 
             schermoTerminale.text = $"[ITERAZIONE {i} DI 3]\nCaricamento incremento X = {incremento}...";
-            yield return new WaitForSeconds(1.8f); 
+            yield return new WaitForSeconds(1.2f); 
             levaInputA.isOn = true;
             levaInputB.isOn = true;
             
             schermoTerminale.text = $"[ITERAZIONE {i} DI 3]\n[ACCUMULATORE]: {accumulatore} + {incremento}";
-            yield return new WaitForSeconds(2.0f); 
+            yield return new WaitForSeconds(1.2f); 
             levaProcess.isOn = true;
             
             accumulatore += incremento; 
             
             schermoTerminale.text = $"[ITERAZIONE {i} DI 3]\nTOTALE PARZIALE IN MEMORIA: {accumulatore}\nTrasmissione a stampante...";
-            yield return new WaitForSeconds(2.0f);
+            yield return new WaitForSeconds(1.2f);
             levaOutput.isOn = true;
             
-            yield return new WaitForSeconds(3.0f); 
+            yield return new WaitForSeconds(1.5f); 
             
             if (i < 3) 
             {
@@ -282,6 +302,7 @@ public class Livello1Manager : MonoBehaviour
     IEnumerator EffettoViaggioNelTempo()
     {
         inTransizione = true;
+        if (testoDebriefing != null) testoDebriefing.text = "";
         schermoTerminale.text = "[TIME JUMP SEQUENCE INITIATED]\nTRASFERIMENTO DATI NELLA MEMORIA MAGNETICA...";
 
         if (bottoneSubmit != null) bottoneSubmit.gameObject.SetActive(false);
@@ -300,13 +321,13 @@ public class Livello1Manager : MonoBehaviour
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(0f, 0f, 0f, 0f - t); // Questo fade a bianco rimane per il viaggio nel tempo
+                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t));
                 yield return null;
             }
             pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
         }
 
-        yield return new WaitForSeconds(0.5f);
+        yield return StartCoroutine(MostraDebriefing());
         SceneManager.LoadScene("LV2"); 
     }
 
@@ -329,7 +350,7 @@ IEnumerator EffettoFadeIn()
             {
                 float t = (Time.time - tempoInizio) / durataFade;
                 // L'opacità scende gradualmente: 1f - t
-                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - Mathf.Clamp01(t)); 
                 yield return null;
             }
 
@@ -359,11 +380,62 @@ IEnumerator EffettoFadeIn()
     IEnumerator MostraErrore(string messaggioErrore)
     {
         inTransizione = true;
+        GameAnalytics.RegistraErrore();
+        StartCoroutine(EffettoScreenShake());
         SpegniTutteLeLeveSenzaNotifica(); 
         schermoTerminale.text = messaggioErrore + "\n\n[RESETTING CIRCUITI]";
-        yield return new WaitForSeconds(4f);
+        Color coloreOriginale = schermoTerminale != null ? schermoTerminale.color : Color.white;
+        if (schermoTerminale != null) schermoTerminale.color = new Color(1f, 0.1f, 0.1f, coloreOriginale.a);
+        yield return new WaitForSeconds(0.35f);
+        if (schermoTerminale != null) schermoTerminale.color = coloreOriginale;
+        yield return new WaitForSeconds(3.65f);
         schermoTerminale.text = (levaStatus != null && levaStatus.isOn) ? "[DISPLAY: ONLINE]\nPOWER: OFFLINE\nMEM: NULL\nALU: SLEEP\n\nAWAITING POWER..." : "";
         inTransizione = false;
+    }
+
+    IEnumerator EffettoSfarfallioValvole()
+    {
+        if (schermoTerminale == null) yield break;
+        Color coloreOriginale = schermoTerminale.color;
+        for (int i = 0; i < 4; i++)
+        {
+            schermoTerminale.color = new Color(coloreOriginale.r, coloreOriginale.g, coloreOriginale.b, Random.Range(0.1f, 0.4f));
+            yield return new WaitForSeconds(0.05f);
+            schermoTerminale.color = coloreOriginale;
+            yield return new WaitForSeconds(0.05f);
+        }
+    }
+
+    IEnumerator EffettoScreenShake(float durata = 0.25f, float intensita = 12f)
+    {
+        if (pannelloDaScuotere == null) yield break;
+
+        Vector2 posOriginale = pannelloDaScuotere.anchoredPosition;
+        float tempoTrascorso = 0f;
+        while (tempoTrascorso < durata)
+        {
+            pannelloDaScuotere.anchoredPosition = posOriginale +
+                new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)) * intensita;
+            tempoTrascorso += Time.deltaTime;
+            yield return null;
+        }
+        pannelloDaScuotere.anchoredPosition = posOriginale;
+    }
+
+    IEnumerator MostraDebriefing()
+    {
+        if (testoDebriefing == null)
+        {
+            yield return new WaitForSeconds(1f);
+            yield break;
+        }
+
+        foreach (char carattere in fraseDebriefing)
+        {
+            testoDebriefing.text += carattere;
+            yield return new WaitForSeconds(0.04f);
+        }
+        yield return new WaitForSeconds(2.5f);
     }
 
     IEnumerator PassaggioFase(StatoTask nuovaFase, float tempoAttesa)
@@ -389,11 +461,14 @@ IEnumerator EffettoFadeIn()
 
     public void ApriHelp()
     {
+        GameAnalytics.RegistraAiuto();
         if (inTransizione && livelloCompletato) return; 
         
         if (pannelloHelp == null || testoHelp == null) return;
 
+        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
         pannelloHelp.SetActive(true);
+        animazioneHelp = StartCoroutine(AnimaApriHelp());
         switch (taskCorrente)
         {
             case StatoTask.Facile:
@@ -434,7 +509,7 @@ IEnumerator EffettoFadeIn()
             {
                 float t = (Time.time - tempoInizio) / durataFade;
                 // 2. L'alpha sale gradualmente con 't'
-                pannelloTransizione.color = new Color(0f, 0f, 0f, t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t)); 
                 yield return null;
             }
             
@@ -448,7 +523,52 @@ IEnumerator EffettoFadeIn()
 
     public void ChiudiHelp()
     {
-        if (pannelloHelp != null) pannelloHelp.SetActive(false);
+        if (pannelloHelp == null) return;
+        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
+        animazioneHelp = StartCoroutine(AnimaChiudiHelp());
+    }
+
+    IEnumerator AnimaApriHelp()
+    {
+        RectTransform rect = pannelloHelp.GetComponent<RectTransform>();
+        CanvasGroup gruppo = pannelloHelp.GetComponent<CanvasGroup>();
+        if (rect == null) yield break;
+        if (gruppo == null) gruppo = pannelloHelp.AddComponent<CanvasGroup>();
+        rect.localScale = Vector3.one * 0.5f;
+        gruppo.alpha = 0f;
+        float tempo = 0f;
+        while (tempo < 0.25f)
+        {
+            tempo += Time.deltaTime;
+            float t = Mathf.Clamp01(tempo / 0.25f);
+            float curva = Mathf.Sin(t * Mathf.PI * 0.5f);
+            rect.localScale = Vector3.Lerp(Vector3.one * 0.5f, Vector3.one * 1.08f, curva);
+            gruppo.alpha = t;
+            yield return null;
+        }
+        rect.localScale = Vector3.one;
+        gruppo.alpha = 1f;
+    }
+
+    IEnumerator AnimaChiudiHelp()
+    {
+        RectTransform rect = pannelloHelp.GetComponent<RectTransform>();
+        CanvasGroup gruppo = pannelloHelp.GetComponent<CanvasGroup>();
+        if (rect == null) yield break;
+        if (gruppo == null) gruppo = pannelloHelp.AddComponent<CanvasGroup>();
+        Vector3 scalaIniziale = rect.localScale;
+        float tempo = 0f;
+        while (tempo < 0.15f)
+        {
+            tempo += Time.deltaTime;
+            float t = Mathf.Clamp01(tempo / 0.15f);
+            rect.localScale = Vector3.Lerp(scalaIniziale, Vector3.zero, t);
+            gruppo.alpha = 1f - t;
+            yield return null;
+        }
+        pannelloHelp.SetActive(false);
+        rect.localScale = Vector3.one;
+        gruppo.alpha = 1f;
     }
 
     void AggiornaPopupObiettivo()

@@ -13,14 +13,14 @@ public class Livello3Manager : MonoBehaviour
     public StatoTask taskCorrente = StatoTask.Facile;
     private int slotSelezionato = -1;
     private bool inTransizione = false;
-    private bool giocoFinito = false; 
+    private bool giocoFinito = false;
 
     [Header("UI - Finestra Principale")]
     public GameObject containerFacile;
     public GameObject containerMedia;
     public GameObject containerDifficile;
     public TextMeshProUGUI logConsole;
-    public Image pannelloTransizione; 
+    public Image pannelloTransizione;
 
     [Header("Cambio Scena Finale")]
     public string nomeScenaSuccessiva = "LV4";
@@ -35,6 +35,13 @@ public class Livello3Manager : MonoBehaviour
     [Header("Sistema Help")]
     public GameObject pannelloHelp;
     public TextMeshProUGUI testoHelp;
+
+    [Header("Effetto Shake")]
+    public RectTransform pannelloDaScuotere;
+
+    [Header("Debriefing")]
+    public TextMeshProUGUI testoDebriefing;
+    [TextArea] public string fraseDebriefing = "Terza era: il codice divenne strutturato. Ora la macchina imparera' a comprendere intenzioni.";
 
     [Header("Slots FACILE (4 Blocchi)")]
     public Image[] slotsFacileImg = new Image[4];
@@ -69,13 +76,14 @@ public class Livello3Manager : MonoBehaviour
     public Image immagineBottoneSubmit;
     private Color coloreOriginaleSubmit;
     private Coroutine lampeggioVerdeCoroutine;
-    
+    private Coroutine animazioneHelp;
+
 
     void Start()
     {
         if (pannelloHelp != null) pannelloHelp.SetActive(false);
         if (pannelloPopupBlocchi != null) pannelloPopupBlocchi.SetActive(false);
-        
+
         if (finestraWindows != null) finestraWindows.SetActive(false);
         if (finestraMac != null) finestraMac.SetActive(false);
         if (finestraLinux != null) finestraLinux.SetActive(false);
@@ -94,16 +102,16 @@ public class Livello3Manager : MonoBehaviour
         ImpostaFase();
     }
 
-IEnumerator EffettoFadeIn()
+    IEnumerator EffettoFadeIn()
     {
         inTransizione = true;
         if (pannelloTransizione != null)
         {
             pannelloTransizione.gameObject.SetActive(true);
-            pannelloTransizione.raycastTarget = true; 
-            
+            pannelloTransizione.raycastTarget = true;
+
             // Inizia completamente NERO
-            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f); 
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
 
             float durataFade = 2.0f;
             float tempoInizio = Time.time;
@@ -112,7 +120,7 @@ IEnumerator EffettoFadeIn()
             {
                 float t = (Time.time - tempoInizio) / durataFade;
                 // L'opacità scende gradualmente: 1f - t
-                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - Mathf.Clamp01(t));
                 yield return null;
             }
 
@@ -143,19 +151,19 @@ IEnumerator EffettoFadeIn()
                 logConsole.text = "> JVM READY.\n> Chiudi la logica nello SCOPE del LOOP. Premi INVIO per il test finale.";
         }
     }
-    
-// ==========================================
+
+    // ==========================================
     // RITORNO AL MENU PRINCIPALE CON ANIMAZIONE
     // ==========================================
     public void TornaAlMenu()
     {
         // Se c'è già un'animazione in corso o il gioco è finito, ignora il clic
-        if (inTransizione) return; 
-        
+        if (inTransizione) return;
+
         StartCoroutine(EffettoFadeMenu());
     }
 
-   IEnumerator EffettoFadeMenu()
+    IEnumerator EffettoFadeMenu()
     {
         inTransizione = true;
 
@@ -163,10 +171,10 @@ IEnumerator EffettoFadeIn()
         {
             pannelloTransizione.gameObject.SetActive(true);
             pannelloTransizione.raycastTarget = true; // Blocca i clic sullo schermo
-            
+
             // 1. Inizia NERO TRASPARENTE (alpha = 0)
-            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f); 
-            
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
+
             float durataFade = 1.0f; // Durata del caricamento (1 secondo)
             float tempoInizio = Time.time;
 
@@ -174,30 +182,30 @@ IEnumerator EffettoFadeIn()
             {
                 float t = (Time.time - tempoInizio) / durataFade;
                 // 2. L'alpha sale gradualmente con 't'
-                pannelloTransizione.color = new Color(0f, 0f, 0f, t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t));
                 yield return null;
             }
-            
+
             // 3. Finisce NERO OPACO (alpha = 1)
             pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
         }
 
         yield return new WaitForSeconds(0.2f); // Piccola pausa scenica prima di caricare
-        SceneManager.LoadScene("Menu"); 
+        SceneManager.LoadScene("Menu");
     }
 
     public void CliccatoSlot(int indice)
     {
-        if (inTransizione || giocoFinito) return; 
+        if (inTransizione || giocoFinito) return;
 
         if (taskCorrente == StatoTask.Facile && (indice < 0 || indice >= 4)) return;
         if (taskCorrente == StatoTask.Media && (indice < 0 || indice >= 3)) return;
         if (taskCorrente == StatoTask.Difficile && (indice < 0 || indice >= 2)) return;
-        
+
         slotSelezionato = indice;
         EvidenziaSlotDiGiallo(indice);
 
-        if (pannelloPopupBlocchi != null) 
+        if (pannelloPopupBlocchi != null)
             pannelloPopupBlocchi.SetActive(true);
     }
 
@@ -211,27 +219,30 @@ IEnumerator EffettoFadeIn()
         {
             blocchiFacile[slotSelezionato] = bloccoScelto;
             AggiornaGraficaSlot(slotsFacileImg[slotSelezionato], slotsFacileTxt[slotSelezionato], bloccoScelto);
+            StartCoroutine(EffettoPopUI(slotsFacileImg[slotSelezionato].transform));
         }
         else if (taskCorrente == StatoTask.Media && slotSelezionato < 3)
         {
             blocchiMedia[slotSelezionato] = bloccoScelto;
             AggiornaGraficaSlot(slotsMediaImg[slotSelezionato], slotsMediaTxt[slotSelezionato], bloccoScelto);
+            StartCoroutine(EffettoPopUI(slotsMediaImg[slotSelezionato].transform));
         }
         else if (taskCorrente == StatoTask.Difficile && slotSelezionato < 2)
         {
             blocchiDifficile[slotSelezionato] = bloccoScelto;
             AggiornaGraficaSlot(slotsDifficileImg[slotSelezionato], slotsDifficileTxt[slotSelezionato], bloccoScelto);
+            StartCoroutine(EffettoPopUI(slotsDifficileImg[slotSelezionato].transform));
         }
 
         if (pannelloPopupBlocchi != null) pannelloPopupBlocchi.SetActive(false);
         PulisciEvidenziature();
-        AggiornaAnteprimaCodice(); 
+        AggiornaAnteprimaCodice();
         slotSelezionato = -1;
     }
 
     void AggiornaGraficaSlot(Image img, TextMeshProUGUI txt, TipoBlocco blocco)
     {
-        if (img == null || txt == null) return; 
+        if (img == null || txt == null) return;
 
         switch (blocco)
         {
@@ -249,23 +260,39 @@ IEnumerator EffettoFadeIn()
     void EvidenziaSlotDiGiallo(int indice)
     {
         PulisciEvidenziature();
-        
-        if (taskCorrente == StatoTask.Facile && indice < slotsFacileImg.Length && slotsFacileImg[indice] != null) 
+
+        if (taskCorrente == StatoTask.Facile && indice < slotsFacileImg.Length && slotsFacileImg[indice] != null)
             slotsFacileImg[indice].color = Color.yellow;
-        else if (taskCorrente == StatoTask.Media && indice < slotsMediaImg.Length && slotsMediaImg[indice] != null) 
+        else if (taskCorrente == StatoTask.Media && indice < slotsMediaImg.Length && slotsMediaImg[indice] != null)
             slotsMediaImg[indice].color = Color.yellow;
-        else if (taskCorrente == StatoTask.Difficile && indice < slotsDifficileImg.Length && slotsDifficileImg[indice] != null) 
+        else if (taskCorrente == StatoTask.Difficile && indice < slotsDifficileImg.Length && slotsDifficileImg[indice] != null)
             slotsDifficileImg[indice].color = Color.yellow;
     }
 
     void PulisciEvidenziature()
     {
-        for (int i = 0; i < 4; i++) { if(slotsFacileImg[i] != null) AggiornaGraficaSlot(slotsFacileImg[i], slotsFacileTxt[i], blocchiFacile[i]); }
-        for (int i = 0; i < 3; i++) { if(slotsMediaImg[i] != null) AggiornaGraficaSlot(slotsMediaImg[i], slotsMediaTxt[i], blocchiMedia[i]); }
-        for (int i = 0; i < 2; i++) { if(slotsDifficileImg[i] != null) AggiornaGraficaSlot(slotsDifficileImg[i], slotsDifficileTxt[i], blocchiDifficile[i]); }
+        for (int i = 0; i < 4; i++) { if (slotsFacileImg[i] != null) AggiornaGraficaSlot(slotsFacileImg[i], slotsFacileTxt[i], blocchiFacile[i]); }
+        for (int i = 0; i < 3; i++) { if (slotsMediaImg[i] != null) AggiornaGraficaSlot(slotsMediaImg[i], slotsMediaTxt[i], blocchiMedia[i]); }
+        for (int i = 0; i < 2; i++) { if (slotsDifficileImg[i] != null) AggiornaGraficaSlot(slotsDifficileImg[i], slotsDifficileTxt[i], blocchiDifficile[i]); }
     }
 
-void AggiornaAnteprimaCodice()
+    IEnumerator EffettoPopUI(Transform oggettoUI)
+    {
+        if (oggettoUI == null) yield break;
+        Vector3 scalaOriginale = oggettoUI.localScale;
+        oggettoUI.localScale = scalaOriginale * 0.5f;
+        float tempo = 0f;
+        while (tempo < 1f)
+        {
+            tempo += Time.deltaTime * 8f;
+            float curva = Mathf.Sin(Mathf.Clamp01(tempo) * Mathf.PI * 0.5f);
+            oggettoUI.localScale = Vector3.Lerp(scalaOriginale * 0.5f, scalaOriginale * 1.15f, curva);
+            yield return null;
+        }
+        oggettoUI.localScale = scalaOriginale;
+    }
+
+    void AggiornaAnteprimaCodice()
     {
         if (testoCodiceAnteprima == null) return;
 
@@ -284,7 +311,7 @@ void AggiornaAnteprimaCodice()
         testoCodiceAnteprima.text = codiceGenerato;
     }
 
-string RitornaCodiceDaBlocco(TipoBlocco blocco)
+    string RitornaCodiceDaBlocco(TipoBlocco blocco)
     {
         switch (blocco)
         {
@@ -313,7 +340,7 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
             for (int i = 0; i < 4; i++) { if (blocchiFacile[i] == TipoBlocco.Vuoto) blocchiVuoti++; }
 
             if (blocchiVuoti > 0) logTesto = $"> ERRORE DI SINTASSI [Javac].\n> Trovati {blocchiVuoti} blocchi non definiti.";
-            else if (blocchiFacile[0] == TipoBlocco.InputA && blocchiFacile[1] == TipoBlocco.InputB && 
+            else if (blocchiFacile[0] == TipoBlocco.InputA && blocchiFacile[1] == TipoBlocco.InputB &&
                      blocchiFacile[2] == TipoBlocco.Add && blocchiFacile[3] == TipoBlocco.Output) corretto = true;
             else if (blocchiFacile[3] != TipoBlocco.Output) logTesto = "> ERRORE LOGICO.\n> Il programma deve restituire un OUTPUT.";
             else if (blocchiFacile[0] != TipoBlocco.InputA && blocchiFacile[0] != TipoBlocco.InputB) logTesto = "> EXCEPTION.\n> Nessun dato caricato (Richiesto: INPUT).";
@@ -336,10 +363,10 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
             if (blocchiVuoti > 0) logTesto = $"> ERRORE DI SINTASSI.\n> Mancano dei blocchi nel costrutto iterativo.";
             // ORA LA FASE DIFFICILE RICHIEDE IL BLOCCO LOOP E IL BLOCCO INCREMENT
             else if (blocchiDifficile[0] == TipoBlocco.LoopAnello && blocchiDifficile[1] == TipoBlocco.Increment) corretto = true;
-            else if (blocchiDifficile[0] == TipoBlocco.Increment) logTesto = "> ERRORE DI SCOPE.\n> Non puoi incrementare una variabile prima di aprire un LOOP.";
+            else if (blocchiDifficile[0] == TipoBlocco.Increment) logTesto = "> [CHRONOS]: Attenzione! La Virtual Machine del '95 richiede che la variabile sia protetta dentro lo scope del LOOP prima di incrementarla.";
             else logTesto = "> ERRORE LOGICO.\n> Per iterare devi inserire il blocco LOOP seguito dall'INCREMENTO.";
         }
-        
+
         if (corretto)
         {
             if (immagineBottoneCheck != null) immagineBottoneCheck.color = Color.green;
@@ -347,6 +374,8 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
         }
         else
         {
+            GameAnalytics.RegistraErrore();
+            StartCoroutine(EffettoScreenShake());
             StartCoroutine(FlashRosso(immagineBottoneCheck, coloreOriginaleCheck));
             if (logConsole != null) logConsole.text = logTesto;
         }
@@ -355,20 +384,20 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
     IEnumerator RoutineTestMultiPiattaforma()
     {
         inTransizione = true;
-        
+
         if (logConsole != null) logConsole.text = "> [JAVAC] Analisi sintassi in corso...\n> Generazione file Bytecode (.class) completata.";
         yield return new WaitForSeconds(2.0f);
 
-        if (logConsole != null) logConsole.text = "> [JVM] Inizializzazione Ambiente Virtuale...\n> [TEST 1/3] Avvio esecuzione su WINDOWS 95.";
-        if (finestraWindows != null) finestraWindows.SetActive(true);
+        if (logConsole != null) logConsole.text = "> [JVM] Inizializzazione Ambiente Virtuale...\n> [TEST 1/3] Avvio esecuzione su WINDOWS 95.\n> [░░░░░░░░░░]";
+        if (finestraWindows != null) { finestraWindows.SetActive(true); StartCoroutine(EffettoPopUI(finestraWindows.transform)); }
         yield return new WaitForSeconds(1.8f);
-        
-        if (logConsole != null) logConsole.text = "> [TEST 1/3] Windows: OK.\n> [TEST 2/3] Porting su architettura MAC OS in corso...";
-        if (finestraMac != null) finestraMac.SetActive(true);
+
+        if (logConsole != null) logConsole.text = "> [TEST 1/3] Windows: OK.\n> [TEST 2/3] Porting su architettura MAC OS in corso...\n> [████░░░░░░]";
+        if (finestraMac != null) { finestraMac.SetActive(true); StartCoroutine(EffettoPopUI(finestraMac.transform)); }
         yield return new WaitForSeconds(1.8f);
-        
-        if (logConsole != null) logConsole.text = "> [TEST 2/3] Mac OS: OK.\n> [TEST 3/3] Esecuzione diretta su Kernel LINUX...";
-        if (finestraLinux != null) finestraLinux.SetActive(true);
+
+        if (logConsole != null) logConsole.text = "> [TEST 2/3] Mac OS: OK.\n> [TEST 3/3] Esecuzione diretta su Kernel LINUX...\n> [███████░░░]";
+        if (finestraLinux != null) { finestraLinux.SetActive(true); StartCoroutine(EffettoPopUI(finestraLinux.transform)); }
         yield return new WaitForSeconds(2.0f);
 
         if (logConsole != null) logConsole.text = "> BUILD SUCCESSFUL.\n> Il paradigma 'Write Once, Run Anywhere' è stato validato su tutti i sistemi.";
@@ -386,7 +415,7 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
         {
             yield return StartCoroutine(AvanzaBarra(1.0f));
         }
-        
+
         if (immagineBottoneCheck != null) immagineBottoneCheck.color = coloreOriginaleCheck;
         StartCoroutine(PassaggioFaseSuccessiva());
     }
@@ -399,25 +428,25 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
         if (finestraMac != null) finestraMac.SetActive(false);
         if (finestraLinux != null) finestraLinux.SetActive(false);
 
-        if (taskCorrente == StatoTask.Facile) 
+        if (taskCorrente == StatoTask.Facile)
         {
             taskCorrente = StatoTask.Media;
             ImpostaFase();
             inTransizione = false;
         }
-        else if (taskCorrente == StatoTask.Media) 
+        else if (taskCorrente == StatoTask.Media)
         {
             taskCorrente = StatoTask.Difficile;
             ImpostaFase();
             inTransizione = false;
         }
-        else if (taskCorrente == StatoTask.Difficile) 
+        else if (taskCorrente == StatoTask.Difficile)
         {
             giocoFinito = true;
             inTransizione = false;
-            
+
             if (logConsole != null) logConsole.text = "> MODULO ANNI '90 COMPLETATO CON SUCCESSO.\n> <color=#00FF66>PREMI SUBMIT PER CONCLUDERE LA SIMULAZIONE.</color>";
-            
+
             if (immagineBottoneCheck != null) immagineBottoneCheck.color = new Color(0.4f, 0.4f, 0.4f);
             lampeggioVerdeCoroutine = StartCoroutine(RespiroVerdeSubmit());
         }
@@ -428,12 +457,12 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
         if (barraTemporaleFill == null) yield break;
         float inizio = Time.time;
         float valIniziale = barraTemporaleFill.fillAmount;
-        float durataAnimazione = 1.5f; 
+        float durataAnimazione = 1.5f;
 
         while (Time.time < inizio + durataAnimazione)
         {
             float t = (Time.time - inizio) / durataAnimazione;
-            t = t * t * (3f - 2f * t); 
+            t = t * t * (3f - 2f * t);
             barraTemporaleFill.fillAmount = Mathf.Lerp(valIniziale, targetValue, t);
             yield return null;
         }
@@ -443,7 +472,7 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
     public void CliccatoSubmit()
     {
         if (inTransizione) return;
-        
+
         if (giocoFinito)
         {
             if (lampeggioVerdeCoroutine != null) StopCoroutine(lampeggioVerdeCoroutine);
@@ -460,6 +489,7 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
     IEnumerator EffettoViaggioNelTempoUscita()
     {
         inTransizione = true;
+        if (testoDebriefing != null) testoDebriefing.text = "";
         if (logConsole != null) logConsole.text = "> INIZIALIZZAZIONE SALTO TEMPORALE...\n> RITORNO AL PRESENTE IN CORSO.";
 
         if (bottoneSubmit != null) bottoneSubmit.gameObject.SetActive(false);
@@ -473,25 +503,56 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
             pannelloTransizione.gameObject.SetActive(true);
             pannelloTransizione.raycastTarget = true;
             pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
-            
+
             float durataFade = 2.5f;
             float tempoInizio = Time.time;
 
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(0f, 0f, 0f, 0f - t);  
+                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t));
                 yield return null;
             }
             pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
         }
 
-        yield return new WaitForSeconds(1.0f);
-        
+        yield return StartCoroutine(MostraDebriefing());
+
         if (!string.IsNullOrEmpty(nomeScenaSuccessiva))
         {
             SceneManager.LoadScene(nomeScenaSuccessiva);
         }
+
+    }
+
+    IEnumerator EffettoScreenShake(float durata = 0.25f, float intensita = 12f)
+    {
+        if (pannelloDaScuotere == null) yield break;
+        Vector2 posOriginale = pannelloDaScuotere.anchoredPosition;
+        float tempoTrascorso = 0f;
+        while (tempoTrascorso < durata)
+        {
+            pannelloDaScuotere.anchoredPosition = posOriginale +
+                new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)) * intensita;
+            tempoTrascorso += Time.deltaTime;
+            yield return null;
+        }
+        pannelloDaScuotere.anchoredPosition = posOriginale;
+    }
+
+    IEnumerator MostraDebriefing()
+    {
+        if (testoDebriefing == null)
+        {
+            yield return new WaitForSeconds(1f);
+            yield break;
+        }
+        foreach (char carattere in fraseDebriefing)
+        {
+            testoDebriefing.text += carattere;
+            yield return new WaitForSeconds(0.04f);
+        }
+        yield return new WaitForSeconds(2.5f);
     }
 
     IEnumerator FlashRosso(Image bottoneImg, Color coloreOriginale)
@@ -511,7 +572,7 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
         if (immagineBottoneSubmit == null) yield break;
         while (giocoFinito)
         {
-            float t = (Mathf.Sin(Time.time * 4f) + 1f) / 2f; 
+            float t = (Mathf.Sin(Time.time * 4f) + 1f) / 2f;
             immagineBottoneSubmit.color = Color.Lerp(coloreOriginaleSubmit, Color.green, t);
             yield return null;
         }
@@ -519,10 +580,13 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
 
     public void ApriHelp()
     {
-        if (inTransizione) return; 
+        GameAnalytics.RegistraAiuto();
+        if (inTransizione) return;
         if (pannelloHelp == null || testoHelp == null) return;
-        
-        pannelloHelp.SetActive(true); 
+
+        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
+        pannelloHelp.SetActive(true);
+        animazioneHelp = StartCoroutine(AnimaApriHelp());
 
         switch (taskCorrente)
         {
@@ -537,8 +601,56 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
                 break;
         }
     }
-    
-    public void ChiudiHelp() { if (pannelloHelp) pannelloHelp.SetActive(false); }
+
+    public void ChiudiHelp()
+    {
+        if (pannelloHelp == null) return;
+        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
+        animazioneHelp = StartCoroutine(AnimaChiudiHelp());
+    }
+
+    IEnumerator AnimaApriHelp()
+    {
+        RectTransform rect = pannelloHelp.GetComponent<RectTransform>();
+        CanvasGroup gruppo = pannelloHelp.GetComponent<CanvasGroup>();
+        if (rect == null) yield break;
+        if (gruppo == null) gruppo = pannelloHelp.AddComponent<CanvasGroup>();
+        rect.localScale = Vector3.one * 0.5f;
+        gruppo.alpha = 0f;
+        float tempo = 0f;
+        while (tempo < 0.25f)
+        {
+            tempo += Time.deltaTime;
+            float t = Mathf.Clamp01(tempo / 0.25f);
+            float curva = Mathf.Sin(t * Mathf.PI * 0.5f);
+            rect.localScale = Vector3.Lerp(Vector3.one * 0.5f, Vector3.one * 1.08f, curva);
+            gruppo.alpha = t;
+            yield return null;
+        }
+        rect.localScale = Vector3.one;
+        gruppo.alpha = 1f;
+    }
+
+    IEnumerator AnimaChiudiHelp()
+    {
+        RectTransform rect = pannelloHelp.GetComponent<RectTransform>();
+        CanvasGroup gruppo = pannelloHelp.GetComponent<CanvasGroup>();
+        if (rect == null) yield break;
+        if (gruppo == null) gruppo = pannelloHelp.AddComponent<CanvasGroup>();
+        Vector3 scalaIniziale = rect.localScale;
+        float tempo = 0f;
+        while (tempo < 0.15f)
+        {
+            tempo += Time.deltaTime;
+            float t = Mathf.Clamp01(tempo / 0.15f);
+            rect.localScale = Vector3.Lerp(scalaIniziale, Vector3.zero, t);
+            gruppo.alpha = 1f - t;
+            yield return null;
+        }
+        pannelloHelp.SetActive(false);
+        rect.localScale = Vector3.one;
+        gruppo.alpha = 1f;
+    }
 
     void AggiornaPopupObiettivo()
     {
@@ -546,14 +658,14 @@ string RitornaCodiceDaBlocco(TipoBlocco blocco)
 
         switch (taskCorrente)
         {
-            case StatoTask.Facile: 
-                testoObiettivo.text = "OBIETTIVO 1: WORA\nIncastra i blocchi (A, B, Calcolo, Stampa). Controlla il codice Java autogenerato e premi INVIO per il test OS."; 
+            case StatoTask.Facile:
+                testoObiettivo.text = "OBIETTIVO 1: WORA\nIncastra i blocchi (A, B, Calcolo, Stampa). Controlla il codice Java autogenerato e premi INVIO per il test OS.";
                 break;
-            case StatoTask.Media: 
-                testoObiettivo.text = "OBIETTIVO 2: BIVIO LOGICO\nScegli il blocco a Y per indicare visivamente la ramificazione del programma. Premi INVIO."; 
+            case StatoTask.Media:
+                testoObiettivo.text = "OBIETTIVO 2: BIVIO LOGICO\nScegli il blocco a Y per indicare visivamente la ramificazione del programma. Premi INVIO.";
                 break;
-            case StatoTask.Difficile: 
-                testoObiettivo.text = "OBIETTIVO 3: LOOP & SCOPE\nUtilizza il blocco LOOP per racchiudere le operazioni iterative al suo interno. Premi INVIO."; 
+            case StatoTask.Difficile:
+                testoObiettivo.text = "OBIETTIVO 3: LOOP & SCOPE\nUtilizza il blocco LOOP per racchiudere le operazioni iterative al suo interno. Premi INVIO.";
                 break;
         }
     }

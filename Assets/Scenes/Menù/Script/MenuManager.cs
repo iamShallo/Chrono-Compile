@@ -44,7 +44,11 @@ public class MenuManager : MonoBehaviour
     // FUNZIONI CARICAMENTO E TRANSIZIONE
     // ==========================================
 
-    public void IniziaDaCapo() { AvviaTransizione(nomeLivello1); }
+    public void IniziaDaCapo() 
+    {
+        GameAnalytics.ResetStatistiche();
+         AvviaTransizione(nomeLivello1); 
+         }
     public void VaiALivello1() { AvviaTransizione(nomeLivello1); }
     public void VaiALivello2() { AvviaTransizione(nomeLivello2); }
     public void VaiALivello3() { AvviaTransizione(nomeLivello3); }
@@ -69,7 +73,7 @@ public class MenuManager : MonoBehaviour
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloFade.color = new Color(0f, 0f, 0f, t);
+                pannelloFade.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t));
                 yield return null;
             }
             pannelloFade.color = new Color(0f, 0f, 0f, 1f);

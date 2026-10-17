@@ -2,14 +2,17 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class Livello5Manager : MonoBehaviour
 {
     [Header("Transizione")]
     public Image pannelloTransizione;
+    public TextMeshProUGUI testoStatistiche;
 
     void Start()
     {
+        if (testoStatistiche != null) testoStatistiche.text = GameAnalytics.OttieniReportFinale();
         // Avvia il fade-in morbido da schermo nero appena entri nel LV5
         if (pannelloTransizione != null) StartCoroutine(EffettoFadeIn());
     }
@@ -48,7 +51,7 @@ public class Livello5Manager : MonoBehaviour
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - Mathf.Clamp01(t)); 
                 yield return null;
             }
 
@@ -72,7 +75,7 @@ public class Livello5Manager : MonoBehaviour
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(0f, 0f, 0f, t); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t)); 
                 yield return null;
             }
             pannelloTransizione.color = new Color(0f, 0f, 0f, 1f); // Torna tutto nero
