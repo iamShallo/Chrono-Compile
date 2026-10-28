@@ -29,6 +29,29 @@ explicit objectives, terminal output, error messages, and debriefing text are
 used to support the learning process without removing the problem-solving
 component.
 
+## Game Structure and Progression
+
+The game is structured as a chronological progression through four historical
+paradigms. The menu provides access to a new session, individual levels, the
+achievement panel, and the thesis questionnaire. During a new session,
+`GameAnalytics` resets the session data and the player begins with `LV1`.
+
+Each level follows the same broad pattern:
+
+1. an introductory transition presents the historical period;
+2. three tasks increase in difficulty and introduce a related programming
+   concept;
+3. the player receives feedback through the interface, terminal output, and
+   contextual help;
+4. a debriefing summarizes the transition to the next period;
+5. the temporal progress bar and level statistics are updated.
+
+The levels use different interaction models rather than presenting the same
+exercise in different visual settings. This is intended to make changes in
+programming practice tangible: direct machine operation becomes structured
+code, then abstracted execution through a virtual machine, and finally
+natural-language specification.
+
 ## Level Environments
 
 The visual design of each level reflects its historical setting and
@@ -57,9 +80,68 @@ The design is informed by the cognitive load model described by Leppink. The
 interface provides structured objectives and immediate feedback to limit
 unnecessary cognitive demands, while the tasks retain the intrinsic difficulty
 of sequencing, control flow, scope, platform constraints, and edge cases.
+Visual objectives, execution states, and feedback also provide a form of
+cognitive offloading by making processes that would otherwise remain invisible
+more explicit to the player.
 
 The final scene records the results of the session and provides a link to the
 questionnaire used for the empirical component of the thesis.
+
+## Achievements and Session Analytics
+
+Achievements are integrated into the progression rather than being limited to
+an external scoring system. They provide additional feedback on the player's
+actions and encourage attention to both successful solutions and mistakes.
+Achievements are grouped into the following categories:
+
+- **Stage achievements:** one for each of the three tasks in every level.
+- **Timed achievements:** awarded for completing a level within the defined
+  time threshold.
+- **Level-specific achievements:** tied to behaviours such as making an error,
+  avoiding the help system, or completing a level after repeated failed
+  attempts.
+- **Global achievements:** awarded for events across the whole session, such
+  as the first error, accumulating several errors, completing all levels
+  without using help, or completing the game without errors.
+
+`GameAnalytics.cs` records elapsed time, total errors, help requests, level
+completion, and unlocked achievements. The final scene presents these data as
+a session report. The statistics are session-based and are not intended to
+replace the questionnaires or the learning-outcome measures used in the
+research study.
+
+## Thesis Study and Research Objectives
+
+The educational objective is to connect the historical development of
+programming tools with direct interaction. The game is designed to let
+students experience how successive abstractions can reduce coding friction
+while introducing new demands, such as control-flow reasoning, scope,
+platform compatibility, error handling, and precise specification.
+
+The planned study focuses on students following secondary-school computer
+science curricula. It compares a game-based learning condition with a
+traditional instructional condition and addresses three research questions:
+
+- **RQ1 — Learning outcomes:** To what extent does the game-based prototype
+  affect students' learning outcomes compared with traditional instruction?
+- **RQ2 — Motivation and engagement:** How does the game-based condition
+  affect intrinsic motivation and task engagement?
+- **RQ3 — Cognitive load:** How does perceived cognitive load differ between
+  the two learning conditions, and how does it relate to learning outcomes?
+
+The evaluation uses learning-outcome measures together with standardized
+engagement questionnaires and a cognitive-load instrument based on Leppink
+et al. The study is intended to examine whether a playful learning approach
+can reduce perceived mental fatigue without reducing the conceptual demands of
+the activities.
+
+The project is also motivated by a limitation identified in the related
+literature: positive results from educational games do not necessarily explain
+how individual mechanics create or reduce didactic friction and cognitive
+overload. Chrono-Compile therefore makes the mechanics visible and records
+in-game indicators such as errors, help requests, and completion time. These
+indicators are complementary to, and not substitutes for, the formal
+evaluation instruments.
 
 ## Use of AI-Generated Images
 
