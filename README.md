@@ -1,75 +1,154 @@
-# Chrono-Compile: The Evolution of Programming Paradigms and Cognitive Load
+# Chrono-Compile
 
-[![Unity](https://img.shields.io/badge/Unity-6000.0+-black?style=for-the-badge&logo=unity&logoColor=white)](https://unity.com/)
-[![C#](https://img.shields.io/badge/C%23-Code-239120?style=for-the-badge&logo=c-sharp&logoColor=white)](https://docs.microsoft.com/en-us/dotnet/csharp/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Unity](https://img.shields.io/badge/Unity-6000.3.23f1-black?style=for-the-badge&logo=unity&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-Unity-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
+![Input System](https://img.shields.io/badge/Input%20System-1.20.1-blue?style=for-the-badge)
 
-This repository contains the source code and assets for **Chrono-Compile**, an educational, time-traveling puzzle game developed as a Master's thesis project in Computer Science at the University of Camerino. 
+Chrono-Compile is an educational puzzle game developed as part of a Master's
+thesis in Computer Science at the University of Camerino. The project examines
+how the historical development of programming paradigms can be presented
+through an interactive learning environment, with particular attention to
+cognitive load during the acquisition of programming concepts.
 
-The software investigates the historical evolution of software development paradigms—ranging from early procedural systems to modern AI-assisted workflows—and evaluates their impact on learners' cognitive load.
+The game presents four stages of computing history. Each stage uses a
+different interaction model and focuses on a specific transition in the
+relationship between programmers, programs, and machines.
 
----
+## Game Structure
 
-## Background and Theoretical Framework
+| Scene | Historical context | Main activity |
+| --- | --- | --- |
+| `LV1` | 1940s: Von Neumann architecture | Operating a simulated computer through power, input, processing, output, and execution controls |
+| `LV2` | 1960s-1970s: Structured programming | Rewriting programs based on line numbers, `GOTO`, conditional execution, and loops |
+| `LV3` | 1990s: Virtual machines and visual programming | Assembling code blocks, compiling a program, and selecting a compatible target platform |
+| `LV4` | 2020s: Artificial intelligence and prompt engineering | Writing prompts that specify operations, error handling, and bounded iteration |
+| `Fine` | Final assessment | Reviewing game statistics and achievements, with access to the thesis questionnaire |
 
-### Game-Based Learning in Computer Science Education
-Game-Based Learning (GBL) integrates pedagogical frameworks into interactive environments to transform passive instruction into active problem-solving. In computer science education, foundational concepts such as syntax rules, control structures, and semantic constraints often impose significant barriers to entry. Chrono-Compile addresses this by embedding historical computational models into a chronological narrative, lowering initial friction while maintaining rigorous conceptual accuracy.
+Each level contains three progressively more demanding tasks. Contextual help,
+explicit objectives, terminal output, error messages, and debriefing text are
+used to support the learning process without removing the problem-solving
+component.
 
-### Cognitive Load Theory (Leppink's Model)
-The design of the simulation is grounded in Leppink's cognitive load model, focusing on the trade-offs between mental efforts during software learning:
-- **Extraneous Cognitive Load:** The cognitive overhead resulting from poor interface design, low-level instruction management, and rigid syntactic syntax (prominent in early paradigms).
-- **Intrinsic Cognitive Load:** The inherent difficulty associated with the problem domain itself (e.g., algorithmic logic and logical constraints), which shifts to the forefront as developer tools evolve.
+## Educational Framework
 
----
+Chrono-Compile applies game-based learning to introductory programming
+education. Its progression moves from direct machine control to increasingly
+abstract forms of programming:
 
-## Evaluation and Empirical Testing
+1. execution of operations through hardware-like controls;
+2. control flow and the limitations of unstructured code;
+3. abstraction, compilation, scope, and platform compatibility;
+4. specification and error handling through natural-language prompts.
 
-To measure the educational efficacy of the application, an empirical testing phase is structured for high school curricula focused on Information Technology and Telecommunications:
-- **Research Objective:** To analyze whether a gamified, multi-era learning progression yields higher academic performance and reduces mental fatigue compared to traditional lecture methodologies.
-- **Methodology:** Administration of standardized cognitive load questionnaires based on Leppink's model, administered before and after student interaction with the software modules.
+The design is informed by the cognitive load model described by Leppink. The
+interface provides structured objectives and immediate feedback to limit
+unnecessary cognitive demands, while the tasks retain the intrinsic difficulty
+of sequencing, control flow, scope, platform constraints, and edge cases.
 
----
+The final scene records the results of the session and provides a link to the
+questionnaire used for the empirical component of the thesis.
 
-## System Architecture and Levels
+## Main Features
 
-The application flow is managed via modular C# controllers and structured across distinct scenes:
+- Four chronological programming scenarios with different interaction models.
+- Three difficulty stages in each level.
+- Contextual help panels and objective prompts.
+- Terminal-style output, typewriter text, generated code previews, and
+  simulated AI chat.
+- Scene transitions, period introductions, fade effects, button animations,
+  and screen-shake feedback.
+- Session statistics, including elapsed time, errors, and help usage.
+- Per-stage, per-level, timed, and global achievements.
+- Final report with a summary of statistics and unlocked achievements.
+- Menu navigation for starting a new session, selecting levels, reviewing
+  achievements, opening the thesis questionnaire, and exiting the application.
 
-1. **Menu Scene (`Menu`):** The main entry point featuring dynamic background switching, level selection, options, and direct integration with the thesis data-collection form.
-2. **LV1 & LV2 (The Early Era):** Procedural logic and low-level instruction execution, emphasizing strict structural and syntactic constraints (`Livello1Manager.cs`, `Livello2Manager.cs`).
-3. **LV3 (The 1990s - Object-Oriented & Virtual Machines):** Implements visual structured blocks, the Java Virtual Machine architecture, and scoping mechanisms (`Livello3Manager.cs`).
-4. **LV4 (The 2020s - AI & Prompt Engineering):** Replaces traditional code composition with a conversational prompt interface (`Livello4Manager.cs`), focusing on high-order analytical precision and edge-case handling via natural language.
-5. **Final Scene (`Fine`):** The concluding victory screen (`FineManager.cs`) acknowledging the completion of the time-traveling journey and providing direct access to the thesis Google Form for empirical evaluation.
+## Requirements
 
----
+- Unity **6000.3.23f1** (Unity 6)
+- Unity Hub
+- Git
+- An operating system supported by the selected Unity version
 
-## Project Structure
+The project uses Unity Input System, TextMesh Pro, UGUI, Timeline, Visual
+Scripting, Unity AI Assistant, and Unity AI Inference. Package versions are
+specified in [`Packages/manifest.json`](Packages/manifest.json).
+
+## Getting Started
+
+Clone the repository and open it with the required Unity version:
+
+```bash
+git clone https://github.com/iamShallo/Chrono-Compile.git
+cd Chrono-Compile
+```
+
+Open the project through Unity Hub, then open the `Menu` scene and enter Play
+Mode. The scenes used by the game are listed in
+[`ProjectSettings/EditorBuildSettings.asset`](ProjectSettings/EditorBuildSettings.asset):
+
+```text
+Menu -> LV1 -> LV2 -> LV3 -> LV4 -> Fine
+```
+
+To create a build, confirm that these scenes are included in the build
+configuration and appear in the order shown above. The `Library/` directory is
+generated by Unity and is not required when cloning or restoring the project.
+
+## Repository Layout
 
 ```text
 Chrono-Compile/
-│
 ├── Assets/
 │   ├── Scenes/
-│   │   ├── Menu/
+│   │   ├── Menù/
+│   │   │   ├── Menu.unity
 │   │   │   └── Script/
-│   │   │       └── MenuManager.cs       # Main menu and navigation controller
+│   │   │       ├── AchievementMenu.cs
+│   │   │       ├── BottoneAnimato.cs
+│   │   │       └── MenuManager.cs
 │   │   ├── LV1/
-│   │   │   └── Script/
-│   │   │       └── Livello1Manager.cs   # Procedural logic controller
+│   │   │   ├── LV1.unity
+│   │   │   └── Script/Livello1Manager.cs
 │   │   ├── LV2/
-│   │   │   └── Script/
-│   │   │       └── Livello2Manager.cs   # Intermediate execution controller
+│   │   │   ├── LV2.unity
+│   │   │   └── Script/Livello2Manager.cs
 │   │   ├── LV3/
-│   │   │   └── Script/
-│   │   │       └── Livello3Manager.cs   # JVM and visual block evaluation engine
+│   │   │   ├── LV3.unity
+│   │   │   └── Script/Livello3Manager.cs
 │   │   ├── LV4/
-│   │   │   └── Script/
-│   │   │       └── Livello4Manager.cs   # Natural language prompt validation engine
+│   │   │   ├── LV4.unity
+│   │   │   └── Script/Livello4Manager.cs
 │   │   └── Fine/
-│   │       └── Script/
-│   │           └── FineManager.cs       # Conclusion and feedback form controller
-│   │
-│   ├── TextMeshPro/
-│   └── Settings/
-│
+│   │       ├── Fine.unity
+│   │       ├── GameAnalytics.cs
+│   │       └── Livello5Manager.cs
 ├── Packages/
-└── ProjectSettings/
+├── ProjectSettings/
+└── README.md
+```
+
+### Core Scripts
+
+- `MenuManager` controls scene navigation, level selection, loading fades,
+  achievements, and external links.
+- `Livello1Manager` through `Livello4Manager` implement the level-specific
+  tasks, user interface, help system, feedback, and transitions.
+- `GameAnalytics` maintains session statistics, achievement state, and the
+  final reports.
+- `Livello5Manager` presents the final report and handles the return to the
+  main menu.
+- `AchievementNotification` displays achievements when they are unlocked
+  during a level.
+
+## Project Status
+
+The repository contains a playable Unity prototype covering the complete
+sequence from the main menu to the final scene. The questionnaire link is
+included in the application for the thesis data-collection phase. Empirical
+analysis of the collected responses is outside the runtime project.
+
+## License
+
+The repository does not currently include a license file. A license should be
+added before distributing the project outside its thesis context.
