@@ -35,6 +35,8 @@ public class Livello3Manager : MonoBehaviour
     [Header("Sistema Help")]
     public GameObject pannelloHelp;
     public TextMeshProUGUI testoHelp;
+    public GameObject pannelloAchievement;
+    public TextMeshProUGUI testoAchievement;
 
     [Header("Effetto Shake")]
     public RectTransform pannelloDaScuotere;
@@ -81,6 +83,11 @@ public class Livello3Manager : MonoBehaviour
 
     void Start()
     {
+        if (pannelloAchievement == null) pannelloAchievement = pannelloHelp;
+        if (testoAchievement == null) testoAchievement = testoHelp;
+        AchievementNotification notificaAchievement = gameObject.AddComponent<AchievementNotification>();
+        notificaAchievement.Configura(pannelloAchievement, testoAchievement);
+        GameAnalytics.IniziaLivello(3);
         if (pannelloHelp != null) pannelloHelp.SetActive(false);
         if (pannelloPopupBlocchi != null) pannelloPopupBlocchi.SetActive(false);
 
@@ -430,18 +437,22 @@ public class Livello3Manager : MonoBehaviour
 
         if (taskCorrente == StatoTask.Facile)
         {
+            GameAnalytics.SbloccaAchievement(3, 1);
             taskCorrente = StatoTask.Media;
             ImpostaFase();
             inTransizione = false;
         }
         else if (taskCorrente == StatoTask.Media)
         {
+            GameAnalytics.SbloccaAchievement(3, 2);
             taskCorrente = StatoTask.Difficile;
             ImpostaFase();
             inTransizione = false;
         }
         else if (taskCorrente == StatoTask.Difficile)
         {
+            GameAnalytics.CompletaLivello(3);
+            GameAnalytics.SbloccaAchievement(3, 3);
             giocoFinito = true;
             inTransizione = false;
 

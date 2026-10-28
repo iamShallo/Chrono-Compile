@@ -7,7 +7,6 @@ public class BottoneAnimato : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     private Vector3 scalaOriginale;
     private Vector3 targetScale;
     private bool isHovering = false;
-
     [Header("Impostazioni Animazione")]
     public float moltiplicatoreHover = 1.05f;  // Ingrandisce al 105% quando ci passi sopra
     public float moltiplicatorePremuto = 0.9f; // Rimpicciolisce al 90% quando clicchi

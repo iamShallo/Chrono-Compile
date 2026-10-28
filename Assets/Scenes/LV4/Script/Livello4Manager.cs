@@ -34,6 +34,8 @@ public class Livello4Manager : MonoBehaviour
     [Header("Sistema Help")]
     public GameObject pannelloHelp;
     public TextMeshProUGUI testoHelp;
+    public GameObject pannelloAchievement;
+    public TextMeshProUGUI testoAchievement;
 
     [Header("Effetto Shake")]
     public RectTransform pannelloDaScuotere;
@@ -56,6 +58,11 @@ public class Livello4Manager : MonoBehaviour
 
     void Start()
     {
+        if (pannelloAchievement == null) pannelloAchievement = pannelloHelp;
+        if (testoAchievement == null) testoAchievement = testoHelp;
+        AchievementNotification notificaAchievement = gameObject.AddComponent<AchievementNotification>();
+        notificaAchievement.Configura(pannelloAchievement, testoAchievement);
+        GameAnalytics.IniziaLivello(4);
         if (pannelloHelp != null) pannelloHelp.SetActive(false);
         if (coperturaLogoIA != null) coperturaLogoIA.SetActive(false);
         if (barraTemporaleFill != null) barraTemporaleFill.fillAmount = 0f;
@@ -317,16 +324,20 @@ IEnumerator EffettoFadeIn()
             
             if (taskCorrente == StatoTask.Facile)
             {
+                GameAnalytics.SbloccaAchievement(4, 1);
                 yield return StartCoroutine(AvanzaBarra(0.33f));
                 taskCorrente = StatoTask.Media;
             }
             else if (taskCorrente == StatoTask.Media)
             {
+                GameAnalytics.SbloccaAchievement(4, 2);
                 yield return StartCoroutine(AvanzaBarra(0.66f));
                 taskCorrente = StatoTask.Difficile;
             }
             else if (taskCorrente == StatoTask.Difficile)
             {
+                GameAnalytics.CompletaLivello(4);
+                GameAnalytics.SbloccaAchievement(4, 3);
                 yield return StartCoroutine(AvanzaBarra(1.0f));
                 giocoFinito = true;
                 testoChat.text += "\n<color=#00FF66><b>SISTEMA:</b>\nSimulazione completata. La programmazione è passata dalla scrittura del codice al Prompt Engineering.\nPremi SUBMIT per terminare.</color>\n";

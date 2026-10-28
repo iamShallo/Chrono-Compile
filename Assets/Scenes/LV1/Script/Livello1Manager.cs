@@ -38,6 +38,8 @@ public class Livello1Manager : MonoBehaviour
     [Header("Sistema Help")]
     public GameObject pannelloHelp;
     public TextMeshProUGUI testoHelp;
+    public GameObject pannelloAchievement;
+    public TextMeshProUGUI testoAchievement;
 
     [Header("Effetto Shake")]
     public RectTransform pannelloDaScuotere;
@@ -52,6 +54,11 @@ public class Livello1Manager : MonoBehaviour
 
     void Start()
     {
+        if (pannelloAchievement == null) pannelloAchievement = pannelloHelp;
+        if (testoAchievement == null) testoAchievement = testoHelp;
+        AchievementNotification notificaAchievement = gameObject.AddComponent<AchievementNotification>();
+        notificaAchievement.Configura(pannelloAchievement, testoAchievement);
+        GameAnalytics.IniziaLivello(1);
         if (pannelloHelp != null) 
             pannelloHelp.SetActive(false);
 
@@ -123,6 +130,7 @@ public class Livello1Manager : MonoBehaviour
         if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn && levaOutput.isOn)
         {
             schermoTerminale.text = ">>> CICLO DI VON NEUMANN COMPLETATO <<<\n[POWER: ON] -> DATI CARICATI [X=12, Y=5]\n[ALU]: ADD(12, 5) = 17\n[OUTPUT]: STAMPATO SU CARTA PERFORATA [17]\n\nSUCCESS! LETTURA RISULTATO IN CORSO...";
+            GameAnalytics.SbloccaAchievement(1, 1);
             StartCoroutine(AvanzaBarraTemporale(0.33f)); 
             StartCoroutine(PassaggioFase(StatoTask.Media, 9f));
         }
@@ -153,6 +161,7 @@ public class Livello1Manager : MonoBehaviour
         if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn && levaLoopExecute.isOn)
         {
             schermoTerminale.text = ">>> SALTO CONDIZIONATO ESEGUITO <<<\n[ALU]: 10 + (-15) = -5\n[FLAG NEGATIVO ATTIVO]: Rilevato numero minore di zero.\n[EXECUTE]: Salto logico attivato -> STAMPA SALTATA CON SUCCESSO!\n\nSUCCESS! ANALISI DEL SALTO IN CORSO...";
+            GameAnalytics.SbloccaAchievement(1, 2);
             StartCoroutine(AvanzaBarraTemporale(0.66f)); 
             StartCoroutine(PassaggioFase(StatoTask.Difficile, 9f));
         }
@@ -250,6 +259,8 @@ public class Livello1Manager : MonoBehaviour
         yield return StartCoroutine(AvanzaBarraTemporale(1f)); 
         
         livelloCompletato = true;
+        GameAnalytics.CompletaLivello(1);
+        GameAnalytics.SbloccaAchievement(1, 3);
         schermoTerminale.text = $"[SEQUENZA HARDWARE COMPLETATA]\nVALORE FINALE ACCUMULATORE: {accumulatore}\n\n>>> ERA ANNI '40-'50 COMPLETATA.\n<color=#00FF66>PREMI SUBMIT PER AVVIARE IL SALTO ALL'ERA SUCCESSIVA.</color>";
         
         if (immagineBottoneSubmit != null)

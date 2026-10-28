@@ -9,10 +9,17 @@ public class Livello5Manager : MonoBehaviour
     [Header("Transizione")]
     public Image pannelloTransizione;
     public TextMeshProUGUI testoStatistiche;
+    public GameObject pannelloAchievement;
+    public TextMeshProUGUI testoAchievement;
+    public Button bottoneTornaMenu;
 
     void Start()
     {
         if (testoStatistiche != null) testoStatistiche.text = GameAnalytics.OttieniReportFinale();
+        if (testoAchievement != null && testoAchievement != testoStatistiche)
+            testoAchievement.text = GameAnalytics.OttieniReportAchievementFinale();
+        if (pannelloAchievement != null) pannelloAchievement.SetActive(true);
+        if (bottoneTornaMenu != null) bottoneTornaMenu.onClick.AddListener(TornaAlMenu);
         // Avvia il fade-in morbido da schermo nero appena entri nel LV5
         if (pannelloTransizione != null) StartCoroutine(EffettoFadeIn());
     }
@@ -21,7 +28,7 @@ public class Livello5Manager : MonoBehaviour
     // AZIONI DEI BOTTONI
     // ==========================================
 
-    // Collega questo al bottone "COMPILA IL FORM"
+    // Mantiene disponibile l'azione per eventuali collegamenti futuri.
     public void ApriFormTesi()
     {
         Application.OpenURL("https://forms.gle/xjPnizdEX5kb1teL9");

@@ -45,6 +45,8 @@ public class Livello2Manager : MonoBehaviour
     [Header("Sistema Help")]
     public GameObject pannelloHelp;
     public TextMeshProUGUI testoHelp;
+    public GameObject pannelloAchievement;
+    public TextMeshProUGUI testoAchievement;
 
     [Header("Debriefing")]
     public TextMeshProUGUI testoDebriefing;
@@ -54,6 +56,11 @@ public class Livello2Manager : MonoBehaviour
 
     void Start()
     {
+        if (pannelloAchievement == null) pannelloAchievement = pannelloHelp;
+        if (testoAchievement == null) testoAchievement = testoHelp;
+        AchievementNotification notificaAchievement = gameObject.AddComponent<AchievementNotification>();
+        notificaAchievement.Configura(pannelloAchievement, testoAchievement);
+        GameAnalytics.IniziaLivello(2);
         if (pannelloHelp != null) pannelloHelp.SetActive(false);
         if (barraTemporaleFill != null) barraTemporaleFill.fillAmount = 0f;
 
@@ -278,6 +285,7 @@ public class Livello2Manager : MonoBehaviour
 
         if (testoRigaFacile) testoRigaFacile.text = "<color=#FF3333><s>50 GOTO 60</s></color>\n60 END";
         yield return StartCoroutine(EffettoDistruzioneGoto(testoRigaFacile, "50 GOTO 60"));
+        GameAnalytics.SbloccaAchievement(2, 1);
 
         if (testoCodiceFisso) testoCodiceFisso.text = "let X = 12;\nlet Y = 5;\nlet RES = X + Y;\nprint(RES);";
         if (testoRigaFacile) testoRigaFacile.text = "end;";
@@ -312,6 +320,7 @@ public class Livello2Manager : MonoBehaviour
         string codiceDaScrivere = "<color=#00FF66>if (RES >= 0) {\n    print(\"POSITIVO\");\n}\nelse {\n    print(\"NEGATIVO\");\n}</color>";
 
         yield return StartCoroutine(TypewriterEffect(testoRigaMedia, codiceDaScrivere, 0.05f));
+        GameAnalytics.SbloccaAchievement(2, 2);
 
         if (terminaleLog) terminaleLog.text = "> SUCCESSO: Logica incapsulata in blocchi chiusi { }. Il codice ora e' leggibile.";
 
@@ -350,6 +359,8 @@ public class Livello2Manager : MonoBehaviour
         yield return StartCoroutine(AvanzaBarra(1.0f));
 
         livelloCompletato = true;
+        GameAnalytics.CompletaLivello(2);
+        GameAnalytics.SbloccaAchievement(2, 3);
         if (terminaleLog) terminaleLog.text = "> OTTIMIZZAZIONE 100%. SISTEMA STABILE.\n> <color=#00FF66>PREMI SUBMIT PER AVVIARE IL SALTO TEMPORALE.</color>";
 
         lampeggioVerdeCoroutine = StartCoroutine(RespiroVerdeContinuo());
