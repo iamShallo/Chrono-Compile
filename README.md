@@ -34,21 +34,13 @@ component.
 The visual design of each level reflects its historical setting and
 interaction model.
 
-### LV1 — Early Computing
+| LV1 — Early Computing | LV2 — Structured Programming |
+| --- | --- |
+| <img src="Assets/Scenes/LV1/Immage/LV1.jpeg" alt="LV1 background" width="420"> | <img src="Assets/Scenes/LV2/Immage/LV2.jpg" alt="LV2 background" width="420"> |
 
-![LV1 background](Assets/Scenes/LV1/Immage/LV1.jpeg)
-
-### LV2 — Structured Programming
-
-![LV2 background](Assets/Scenes/LV2/Immage/LV2.jpg)
-
-### LV3 — Virtual Machines and Visual Programming
-
-![LV3 background](Assets/Scenes/LV3/Immage/LV3.jpg)
-
-### LV4 — Artificial Intelligence and Prompt Engineering
-
-![LV4 background](Assets/Scenes/LV4/Immage/LV4.png)
+| LV3 — Virtual Machines and Visual Programming | LV4 — Artificial Intelligence and Prompt Engineering |
+| --- | --- |
+| <img src="Assets/Scenes/LV3/Immage/LV3.jpg" alt="LV3 background" width="420"> | <img src="Assets/Scenes/LV4/Immage/LV4.png" alt="LV4 background" width="420"> |
 
 ## Educational Framework
 
@@ -69,19 +61,17 @@ of sequencing, control flow, scope, platform constraints, and edge cases.
 The final scene records the results of the session and provides a link to the
 questionnaire used for the empirical component of the thesis.
 
-## Use of AI During Development
+## Use of AI-Generated Images
 
-AI-assisted tools were used as a practical part of the development process.
-Their use was motivated by the limited development time, the available budget,
-and the difficulty of finding suitable assets online for some historical
-settings. AI supported code prototyping, iteration, and the creation or
-adaptation of visual assets when appropriate alternatives were not available.
+Gemini and ChatGPT were used to generate some of the visual assets included in
+the project. This approach was adopted because of the limited development
+time, the available budget, and the difficulty of finding suitable historical
+assets online.
 
-The final selection of assets, integration in Unity, gameplay logic, level
-design, and evaluation-related decisions remained part of the project
-development process. AI assistance was therefore used to address practical
-resource constraints, rather than as a replacement for the design and
-implementation work.
+The generated images were selected, edited when necessary, and integrated into
+the Unity scenes as part of the project development process. AI was used for
+image generation only; it was not used to implement the game logic or to make
+the design and evaluation decisions.
 
 ## Main Features
 
