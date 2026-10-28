@@ -17,7 +17,8 @@ public class Livello1Manager : MonoBehaviour
     public Image barraTemporaleFill; 
     public GameObject contenitoreBarraTemporale; 
     public GameObject contenitoreObiettivo;       
-    public Image pannelloTransizione; 
+    public Image pannelloTransizione;
+    public Sprite fotoPeriodo;
 
     [Header("Pulsante SUBMIT")]
     public Button bottoneSubmit;
@@ -342,34 +343,15 @@ public class Livello1Manager : MonoBehaviour
         SceneManager.LoadScene("LV2"); 
     }
 
-    // Fade-in nero iniziale 
-IEnumerator EffettoFadeIn()
+    // Fade-in nero iniziale
+    IEnumerator EffettoFadeIn()
     {
         inTransizione = true;
-        if (pannelloTransizione != null)
-        {
-            pannelloTransizione.gameObject.SetActive(true);
-            pannelloTransizione.raycastTarget = true; 
-            
-            // Inizia completamente NERO
-            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f); 
-
-            float durataFade = 2.0f;
-            float tempoInizio = Time.time;
-
-            while (Time.time < tempoInizio + durataFade)
-            {
-                float t = (Time.time - tempoInizio) / durataFade;
-                // L'opacità scende gradualmente: 1f - t
-                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - Mathf.Clamp01(t)); 
-                yield return null;
-            }
-
-            // Finisce trasparente
-            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
-            pannelloTransizione.raycastTarget = false;
-            pannelloTransizione.gameObject.SetActive(false);
-        }
+        yield return Livello2Manager.AnimazioneIngressoLivello.Esegui(
+            pannelloTransizione,
+            fotoPeriodo,
+            "Anni 40 — Nel silenzio delle sale di calcolo, i primi computer elettronici occupano intere stanze. È qui che il futuro inizia a prendere forma.",
+            false);
         inTransizione = false;
     }
     

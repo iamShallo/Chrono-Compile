@@ -15,6 +15,7 @@ public class Livello2Manager : MonoBehaviour
 
     [Header("Transizione")]
     public Image pannelloTransizione;
+    public Sprite fotoPeriodo;
 
     [Header("Schermo CRT")]
     public TextMeshProUGUI testoCodiceFisso;
@@ -72,33 +73,147 @@ public class Livello2Manager : MonoBehaviour
         StartCoroutine(CursoreLampeggiante());
     }
 
-    IEnumerator EffettoFadeIn()
+    public static class AnimazioneIngressoLivello
     {
-        inTransizione = true;
-        if (pannelloTransizione != null)
+        public static IEnumerator Esegui(Image pannelloTransizione, Sprite fotoPeriodo, string descrizionePeriodo, bool entraDaDestra)
         {
+            if (pannelloTransizione == null)
+                yield break;
+
             pannelloTransizione.gameObject.SetActive(true);
             pannelloTransizione.raycastTarget = true;
+            pannelloTransizione.color = Color.black;
 
-            // Inizia completamente NERO
-            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
-
-            float durataFade = 2.0f;
-            float tempoInizio = Time.time;
-
-            while (Time.time < tempoInizio + durataFade)
+            Image foto = null;
+            TextMeshProUGUI testo = null;
+            if (fotoPeriodo != null)
             {
-                float t = (Time.time - tempoInizio) / durataFade;
-                // L'opacità scende gradualmente: 1f - t
-                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - Mathf.Clamp01(t));
+                GameObject oggettoFoto = new GameObject("FotoIngressoLivello", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                oggettoFoto.transform.SetParent(pannelloTransizione.transform, false);
+                foto = oggettoFoto.GetComponent<Image>();
+                foto.sprite = fotoPeriodo;
+                foto.preserveAspect = true;
+                foto.raycastTarget = false;
+
+                RectTransform rettangoloFoto = foto.rectTransform;
+                rettangoloFoto.anchorMin = new Vector2(0.15f, 0.31f);
+                rettangoloFoto.anchorMax = new Vector2(0.85f, 0.75f);
+                rettangoloFoto.offsetMin = Vector2.zero;
+                rettangoloFoto.offsetMax = Vector2.zero;
+                rettangoloFoto.anchoredPosition = new Vector2(entraDaDestra ? 1200f : -1200f, 0f);
+                rettangoloFoto.localScale = Vector3.one * 0.82f;
+                oggettoFoto.transform.SetAsLastSibling();
+            }
+
+            GameObject oggettoTesto = new GameObject("TestoPeriodoIngresso", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            oggettoTesto.transform.SetParent(pannelloTransizione.transform, false);
+            testo = oggettoTesto.GetComponent<TextMeshProUGUI>();
+            testo.text = $"<size=70%>ARCHIVIO CRONOLOGICO // COORDINATA TEMPORALE</size>\n<b>PERIODO INDIVIDUATO</b>\n{descrizionePeriodo}";
+            testo.alignment = TextAlignmentOptions.Center;
+            testo.fontSize = 27f;
+            testo.color = Color.white;
+            testo.maxVisibleCharacters = 0;
+            testo.raycastTarget = false;
+
+            RectTransform rettangoloTesto = testo.rectTransform;
+            rettangoloTesto.anchorMin = new Vector2(0.12f, 0.08f);
+            rettangoloTesto.anchorMax = new Vector2(0.88f, 0.28f);
+            rettangoloTesto.offsetMin = Vector2.zero;
+            rettangoloTesto.offsetMax = Vector2.zero;
+            oggettoTesto.transform.SetAsLastSibling();
+
+            float durataIngresso = 3.8f;
+            float tempoInizio = Time.time;
+            while (Time.time < tempoInizio + durataIngresso)
+            {
+                float t = Mathf.Clamp01((Time.time - tempoInizio) / durataIngresso);
+                float andamento = Mathf.SmoothStep(0f, 1f, t);
+
+                if (foto != null)
+                {
+                    foto.rectTransform.anchoredPosition = new Vector2(
+                        Mathf.Lerp(entraDaDestra ? 1200f : -1200f, 0f, andamento), 0f);
+                    foto.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.82f, 1f, andamento);
+                    foto.color = Color.white;
+                }
                 yield return null;
             }
 
-            // Finisce trasparente
+            if (foto != null)
+                foto.rectTransform.anchoredPosition = Vector2.zero;
+            yield return ScriviTesto(testo);
+            yield return new WaitForSeconds(5.5f);
+
+            float durataUscita = 3.2f;
+            tempoInizio = Time.time;
+            while (Time.time < tempoInizio + durataUscita)
+            {
+                float t = Mathf.Clamp01((Time.time - tempoInizio) / durataUscita);
+                float andamentoUscita = Mathf.SmoothStep(0f, 1f, t);
+                if (foto != null)
+                {
+                    foto.rectTransform.localScale = Vector3.one * Mathf.Lerp(1f, 2.6f, andamentoUscita);
+                    foto.color = new Color(1f, 1f, 1f, 1f - andamentoUscita);
+                }
+                if (testo != null)
+                    testo.color = new Color(1f, 1f, 1f, 1f - andamentoUscita);
+                yield return null;
+            }
+
+            // La foto scompare nel nero, poi il livello viene rivelato dal fade.
+            yield return new WaitForSeconds(0.6f);
+            tempoInizio = Time.time;
+            while (Time.time < tempoInizio + 1.8f)
+            {
+                float t = Mathf.Clamp01((Time.time - tempoInizio) / 1.8f);
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - Mathf.SmoothStep(0f, 1f, t));
+                yield return null;
+            }
+
+            Object.Destroy(oggettoTesto);
+            if (foto != null)
+                Object.Destroy(foto.gameObject);
             pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
             pannelloTransizione.raycastTarget = false;
             pannelloTransizione.gameObject.SetActive(false);
         }
+
+        private static IEnumerator ScriviTesto(TextMeshProUGUI testo)
+        {
+            if (testo == null)
+                yield break;
+
+            testo.ForceMeshUpdate();
+            int caratteriTotali = testo.textInfo.characterCount;
+            testo.maxVisibleCharacters = 0;
+
+            for (int carattere = 1; carattere <= caratteriTotali; carattere++)
+            {
+                testo.maxVisibleCharacters = carattere;
+                testo.ForceMeshUpdate();
+
+                char ultimoCarattere = testo.textInfo.characterInfo[carattere - 1].character;
+                float ritardo = 0.045f;
+                if (ultimoCarattere == '.' || ultimoCarattere == ':' || ultimoCarattere == '—')
+                    ritardo = 0.24f;
+                else if (ultimoCarattere == ',' || ultimoCarattere == '\n')
+                    ritardo = 0.14f;
+
+                yield return new WaitForSeconds(ritardo);
+            }
+
+            testo.maxVisibleCharacters = caratteriTotali;
+        }
+    }
+
+    IEnumerator EffettoFadeIn()
+    {
+        inTransizione = true;
+        yield return AnimazioneIngressoLivello.Esegui(
+            pannelloTransizione,
+            fotoPeriodo,
+            "Anni 60 — La corsa verso il futuro accelera: i computer entrano nei laboratori e la programmazione diventa il linguaggio di una nuova epoca.",
+            true);
         inTransizione = false;
     }
 

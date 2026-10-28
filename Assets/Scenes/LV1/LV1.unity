@@ -4632,9 +4632,9 @@ RectTransform:
   - {fileID: 1869772876}
   - {fileID: 675138083}
   - {fileID: 355916097}
+  - {fileID: 1237697547}
   - {fileID: 200277951}
   - {fileID: 1775353054}
-  - {fileID: 1237697547}
   - {fileID: 846868234}
   - {fileID: 444268093}
   m_Father: {fileID: 0}
@@ -4663,6 +4663,7 @@ MonoBehaviour:
   contenitoreBarraTemporale: {fileID: 1237697546}
   contenitoreObiettivo: {fileID: 1237697546}
   pannelloTransizione: {fileID: 200277949}
+  fotoPeriodo: {fileID: 21300000, guid: fd77c3412ad44aa299d37a64928b0c90, type: 3}
   bottoneSubmit: {fileID: 1775353055}
   immagineBottoneSubmit: {fileID: 1775353056}
   levaStatus: {fileID: 931979558}

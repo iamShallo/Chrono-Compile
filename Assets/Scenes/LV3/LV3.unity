@@ -2376,6 +2376,7 @@ MonoBehaviour:
   containerDifficile: {fileID: 217580255}
   logConsole: {fileID: 1138553791}
   pannelloTransizione: {fileID: 883017344}
+  fotoPeriodo: {fileID: 115310592532404080, guid: 32b785049a15547a497f011c2a3b962c, type: 3}
   nomeScenaSuccessiva: LV4
   testoCodiceAnteprima: {fileID: 2049032850}
   testoObiettivo: {fileID: 1093817457}

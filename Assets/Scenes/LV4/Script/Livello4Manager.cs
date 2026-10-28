@@ -25,6 +25,7 @@ public class Livello4Manager : MonoBehaviour
 
     [Header("Meta-Gioco (UI)")]
     public Image pannelloTransizione;
+    public Sprite fotoPeriodo;
     public Image barraTemporaleFill;
     public string nomeScenaSuccessiva = "Fine";
 
@@ -81,30 +82,11 @@ public class Livello4Manager : MonoBehaviour
 IEnumerator EffettoFadeIn()
     {
         inTransizione = true;
-        if (pannelloTransizione != null)
-        {
-            pannelloTransizione.gameObject.SetActive(true);
-            pannelloTransizione.raycastTarget = true; 
-            
-            // Inizia completamente NERO
-            pannelloTransizione.color = new Color(0f, 0f, 0f, 1f); 
-
-            float durataFade = 2.0f;
-            float tempoInizio = Time.time;
-
-            while (Time.time < tempoInizio + durataFade)
-            {
-                float t = (Time.time - tempoInizio) / durataFade;
-                // L'opacità scende gradualmente: 1f - t
-                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - Mathf.Clamp01(t)); 
-                yield return null;
-            }
-
-            // Finisce trasparente
-            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
-            pannelloTransizione.raycastTarget = false;
-            pannelloTransizione.gameObject.SetActive(false);
-        }
+        yield return Livello2Manager.AnimazioneIngressoLivello.Esegui(
+            pannelloTransizione,
+            fotoPeriodo,
+            "Presente — Il viaggio raggiunge il nostro tempo: la tecnologia è ovunque e il linguaggio naturale diventa la nuova interfaccia tra mente e macchina.",
+            false);
         inTransizione = false;
     }
 

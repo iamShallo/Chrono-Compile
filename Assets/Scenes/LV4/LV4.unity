@@ -3896,6 +3896,7 @@ MonoBehaviour:
   testoCodiceGenerato: {fileID: 1461664267}
   testoTerminale: {fileID: 1071559181}
   pannelloTransizione: {fileID: 2141500878}
+  fotoPeriodo: {fileID: -5705347072083345908, guid: e8840d9cbbc494e649a21d69051a07a2, type: 3}
   barraTemporaleFill: {fileID: 1225578458}
   nomeScenaSuccessiva: Fine
   testoObiettivo: {fileID: 1521264483}

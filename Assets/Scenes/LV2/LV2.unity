@@ -808,6 +808,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Livello2Manager
   taskCorrente: 0
   pannelloTransizione: {fileID: 1169900753}
+  fotoPeriodo: {fileID: -6589208904782247551, guid: 851c457a8766a4ae5bf37ca518ef25d4, type: 3}
   testoCodiceFisso: {fileID: 1216359676}
   terminaleLog: {fileID: 1489367774}
   bottoneSubmit: {fileID: 488641799}

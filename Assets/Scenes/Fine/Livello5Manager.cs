@@ -58,7 +58,7 @@ public class Livello5Manager : MonoBehaviour
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - Mathf.Clamp01(t)); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, 1f - Mathf.Clamp01(t));
                 yield return null;
             }
 
@@ -73,22 +73,22 @@ public class Livello5Manager : MonoBehaviour
         if (pannelloTransizione != null)
         {
             pannelloTransizione.gameObject.SetActive(true);
-            pannelloTransizione.raycastTarget = true; 
-            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f); 
-            
-            float durataFade = 1.5f; 
+            pannelloTransizione.raycastTarget = true;
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
+
+            float durataFade = 1.5f;
             float tempoInizio = Time.time;
 
             while (Time.time < tempoInizio + durataFade)
             {
                 float t = (Time.time - tempoInizio) / durataFade;
-                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t)); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t));
                 yield return null;
             }
             pannelloTransizione.color = new Color(0f, 0f, 0f, 1f); // Torna tutto nero
         }
 
-        yield return new WaitForSeconds(0.2f); 
+        yield return new WaitForSeconds(0.2f);
         SceneManager.LoadScene("Menu"); // Torna alla scrivania iniziale
     }
 }

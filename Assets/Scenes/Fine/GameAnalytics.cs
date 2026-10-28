@@ -340,6 +340,7 @@ public static class GameAnalytics
                $"• Anomalie/Errori generati: <color=#FF5555>{erroriTotali}</color>\n" +
                $"• Consultazioni Manuale (Help): <color=#55AAFF>{aiutiUsati}</color>";
     }
+
 }
 
 public class AchievementNotification : MonoBehaviour
