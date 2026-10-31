@@ -68,6 +68,7 @@ public class Livello2Manager : MonoBehaviour
         if (immagineBottoneSubmit != null) coloreOriginaleSubmit = immagineBottoneSubmit.color;
 
         if (pannelloTransizione != null) StartCoroutine(EffettoFadeIn());
+        MenuManager.ApplicaFontAccessibilita();
 
         ImpostaFaseCorrente();
         StartCoroutine(CursoreLampeggiante());
@@ -114,6 +115,8 @@ public class Livello2Manager : MonoBehaviour
             testo.color = Color.white;
             testo.maxVisibleCharacters = 0;
             testo.raycastTarget = false;
+            if (MenuManager.FontDislessiaAttivo)
+                MenuManager.ConfiguraTestoDinamico(testo);
 
             RectTransform rettangoloTesto = testo.rectTransform;
             rettangoloTesto.anchorMin = new Vector2(0.12f, 0.08f);

@@ -18,6 +18,8 @@ public class Livello5Manager : MonoBehaviour
         if (testoStatistiche != null) testoStatistiche.text = GameAnalytics.OttieniReportFinale();
         if (testoAchievement != null && testoAchievement != testoStatistiche)
             testoAchievement.text = GameAnalytics.OttieniReportAchievementFinale();
+        MenuManager.ConfiguraTestoAccessibilitaCompatto(testoStatistiche);
+        MenuManager.ConfiguraTestoAccessibilitaCompatto(testoAchievement);
         if (pannelloAchievement != null) pannelloAchievement.SetActive(true);
         if (bottoneTornaMenu != null) bottoneTornaMenu.onClick.AddListener(TornaAlMenu);
         // Avvia il fade-in morbido da schermo nero appena entri nel LV5

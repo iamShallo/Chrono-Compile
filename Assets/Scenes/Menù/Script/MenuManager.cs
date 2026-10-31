@@ -2,10 +2,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
+using UnityEngine.TextCore.LowLevel;
 
 public class MenuManager : MonoBehaviour
 {
+    private const string ChiaveFontDislessia = "font_dislessia";
+    private static TMP_FontAsset fontOpenDyslexic;
+    private static TMP_FontAsset fontPredefinito;
+    private static bool ascoltoSceneAttivo;
+    private static readonly Dictionary<TextMeshProUGUI, float> dimensioniTestoOriginali = new Dictionary<TextMeshProUGUI, float>();
+
     [Header("Pannelli UI (Bottoni)")]
     public GameObject pannelloPrincipale;
     public GameObject pannelloLivelli;
@@ -27,6 +35,11 @@ public class MenuManager : MonoBehaviour
     private Coroutine animazioneAchievement;
     private const float ScalaInizialeAchievement = 0.85f;
 
+    [Header("Accessibilità")]
+    public Button bottoneFontDislessia;
+    private TextMeshProUGUI avvisoFontDislessia;
+    private Coroutine animazioneAvvisoFont;
+
     [Header("Impostazioni Scene")]
     public string nomeLivello1 = "LV1";
     public string nomeLivello2 = "LV2";
@@ -35,11 +48,15 @@ public class MenuManager : MonoBehaviour
 
     void Start()
     {
+        AttivaAggiornamentoFontGlobale();
         if (pannelloPrincipale != null) pannelloPrincipale.SetActive(true);
         if (pannelloLivelli != null) pannelloLivelli.SetActive(false);
 
         if (sfondoConBottoni != null) sfondoConBottoni.SetActive(true);
         if (sfondoSenzaBottoni != null) sfondoSenzaBottoni.SetActive(false);
+        ConfiguraBottoneFontDislessia();
+        CreaAvvisoFontNelCanvas();
+        ConfiguraTestoAccessibilitaCompatto(testoAchievement);
 
         if (pannelloAchievement != null)
         {
@@ -54,6 +71,7 @@ public class MenuManager : MonoBehaviour
                 bottoneChiudiAchievement.onClick.RemoveListener(ChiudiAchievement);
                 bottoneChiudiAchievement.onClick.AddListener(ChiudiAchievement);
             }
+
         }
 
         // Assicuriamoci che il fade sia spento all'avvio del menu
@@ -62,6 +80,241 @@ public class MenuManager : MonoBehaviour
             pannelloFade.gameObject.SetActive(false);
             pannelloFade.color = new Color(0, 0, 0, 0); // Trasparente
         }
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void AttivaAggiornamentoFontGlobale()
+    {
+        if (ascoltoSceneAttivo)
+            return;
+
+        ascoltoSceneAttivo = true;
+        SceneManager.sceneLoaded += QuandoCaricaScena;
+    }
+
+    private static void QuandoCaricaScena(Scene scena, LoadSceneMode modalita)
+    {
+        ApplicaFontAccessibilita();
+    }
+
+    public static bool FontDislessiaAttivo
+    {
+        get { return PlayerPrefs.GetInt(ChiaveFontDislessia, 0) == 1; }
+    }
+
+    public static TMP_FontAsset OttieniFontAccessibilita()
+    {
+        if (fontOpenDyslexic != null)
+            return fontOpenDyslexic;
+
+        Font font = Resources.Load<Font>("OpenDyslexic-Regular");
+        if (font == null)
+        {
+            Debug.LogError("Font OpenDyslexic non trovato in Assets/Resources.");
+            return null;
+        }
+
+        fontOpenDyslexic = TMP_FontAsset.CreateFontAsset(
+            font, 90, 9, GlyphRenderMode.SDFAA, 1024, 1024,
+            AtlasPopulationMode.Dynamic, true);
+        return fontOpenDyslexic;
+    }
+
+    public static void ApplicaFontAccessibilita()
+    {
+        if (fontPredefinito == null)
+            fontPredefinito = TMP_Settings.defaultFontAsset;
+
+        TMP_FontAsset font = FontDislessiaAttivo
+            ? OttieniFontAccessibilita()
+            : fontPredefinito;
+
+        if (font == null)
+            return;
+
+        TMP_Settings.defaultFontAsset = font;
+        TextMeshProUGUI[] testi = FindObjectsByType<TextMeshProUGUI>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None);
+        foreach (TextMeshProUGUI testo in testi)
+        {
+            testo.font = font;
+            ApplicaDimensioneTesto(testo);
+        }
+    }
+
+    private static void ApplicaDimensioneTesto(TextMeshProUGUI testo)
+    {
+        if (!dimensioniTestoOriginali.ContainsKey(testo))
+            dimensioniTestoOriginali[testo] = testo.fontSize;
+
+        testo.fontSize = FontDislessiaAttivo
+            ? dimensioniTestoOriginali[testo] * 0.68f
+            : dimensioniTestoOriginali[testo];
+    }
+
+    public static void ConfiguraTestoDinamico(TextMeshProUGUI testo)
+    {
+        if (testo == null)
+            return;
+
+        TMP_FontAsset font = FontDislessiaAttivo
+            ? OttieniFontAccessibilita()
+            : fontPredefinito != null ? fontPredefinito : TMP_Settings.defaultFontAsset;
+        if (font != null)
+            testo.font = font;
+        ApplicaDimensioneTesto(testo);
+    }
+
+    public static void ConfiguraTestoAccessibilitaCompatto(TextMeshProUGUI testo)
+    {
+        if (testo == null)
+            return;
+
+        ConfiguraTestoDinamico(testo);
+        if (FontDislessiaAttivo && dimensioniTestoOriginali.ContainsKey(testo))
+            testo.fontSize = dimensioniTestoOriginali[testo] * 0.55f;
+    }
+
+    private void ConfiguraBottoneFontDislessia()
+    {
+        if (bottoneFontDislessia == null)
+            bottoneFontDislessia = TrovaBottoneFontDislessiaNelCanvas();
+
+        if (bottoneFontDislessia == null)
+            return;
+
+        bottoneFontDislessia.onClick.RemoveListener(InvertiFontDislessia);
+        bottoneFontDislessia.onClick.AddListener(InvertiFontDislessia);
+        AggiornaContornoFontDislessia(FontDislessiaAttivo);
+        ApplicaFontAccessibilita();
+    }
+
+    public void InvertiFontDislessia()
+    {
+        bool attivo = !FontDislessiaAttivo;
+        PlayerPrefs.SetInt(ChiaveFontDislessia, attivo ? 1 : 0);
+        PlayerPrefs.Save();
+        AggiornaContornoFontDislessia(attivo);
+        ApplicaFontAccessibilita();
+        ConfiguraTestoAccessibilitaCompatto(testoAchievement);
+        RicaricaCanvasAchievement();
+        MostraAvvisoFontDislessia(attivo);
+    }
+
+    private void RicaricaCanvasAchievement()
+    {
+        if (testoAchievement != null)
+            testoAchievement.ForceMeshUpdate(true, true);
+
+        Canvas.ForceUpdateCanvases();
+        if (rettangoloAchievement != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rettangoloAchievement);
+
+        if (pannelloAchievement != null && pannelloAchievement.activeSelf)
+        {
+            pannelloAchievement.SetActive(false);
+            pannelloAchievement.SetActive(true);
+        }
+
+        Canvas.ForceUpdateCanvases();
+    }
+
+    private void MostraAvvisoFontDislessia(bool attivo)
+    {
+        if (avvisoFontDislessia == null)
+            return;
+
+        avvisoFontDislessia.text = attivo
+            ? "OPEN DYSLEXIC ATTIVATO\nTutti i testi del viaggio sono stati aggiornati."
+            : "OPEN DYSLEXIC DISATTIVATO\nÈ stato ripristinato il carattere standard.";
+        avvisoFontDislessia.color = attivo
+            ? new Color(0.2f, 1f, 0.35f, 1f)
+            : new Color(1f, 0.25f, 0.25f, 1f);
+
+        CanvasGroup gruppo = avvisoFontDislessia.GetComponent<CanvasGroup>();
+        gruppo.alpha = 1f;
+        avvisoFontDislessia.gameObject.SetActive(true);
+        if (animazioneAvvisoFont != null)
+            StopCoroutine(animazioneAvvisoFont);
+        animazioneAvvisoFont = StartCoroutine(NascondiAvvisoFont(gruppo));
+    }
+
+    private IEnumerator NascondiAvvisoFont(CanvasGroup gruppo)
+    {
+        yield return new WaitForSecondsRealtime(3.5f);
+        float tempoInizio = Time.unscaledTime;
+        while (Time.unscaledTime < tempoInizio + 0.8f)
+        {
+            gruppo.alpha = 1f - Mathf.Clamp01((Time.unscaledTime - tempoInizio) / 0.8f);
+            yield return null;
+        }
+        gruppo.alpha = 0f;
+        avvisoFontDislessia.gameObject.SetActive(false);
+        animazioneAvvisoFont = null;
+    }
+
+    private void AggiornaContornoFontDislessia(bool attivo)
+    {
+        if (bottoneFontDislessia == null)
+            return;
+
+        Outline contorno = bottoneFontDislessia.GetComponent<Outline>();
+        if (contorno == null)
+            contorno = bottoneFontDislessia.gameObject.AddComponent<Outline>();
+
+        contorno.effectColor = attivo
+            ? new Color(0.1f, 1f, 0.25f, 1f)
+            : new Color(1f, 0.1f, 0.1f, 1f);
+        contorno.effectDistance = new Vector2(4f, 4f);
+        contorno.useGraphicAlpha = false;
+    }
+
+    private Button TrovaBottoneFontDislessiaNelCanvas()
+    {
+        TextMeshProUGUI etichetta = null;
+        TextMeshProUGUI[] testi = FindObjectsByType<TextMeshProUGUI>(
+            FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (TextMeshProUGUI testo in testi)
+        {
+            if (testo.text.Trim() == "FONT DISLESSIA")
+            {
+                etichetta = testo;
+                break;
+            }
+        }
+
+        if (etichetta == null)
+            return null;
+
+        Button bottone = etichetta.GetComponentInParent<Button>();
+        if (bottone == null)
+            return null;
+
+        return bottone;
+    }
+
+    private void CreaAvvisoFontNelCanvas()
+    {
+        Canvas canvas = FindAnyObjectByType<Canvas>();
+        if (canvas == null)
+            return;
+        GameObject avvisoOggetto = new GameObject("AvvisoFontDislessia", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI), typeof(CanvasGroup));
+        avvisoOggetto.transform.SetParent(canvas.transform, false);
+        RectTransform rettangoloAvviso = avvisoOggetto.GetComponent<RectTransform>();
+        rettangoloAvviso.anchorMin = new Vector2(0.5f, 0f);
+        rettangoloAvviso.anchorMax = new Vector2(0.5f, 0f);
+        rettangoloAvviso.pivot = new Vector2(0.5f, 0f);
+        rettangoloAvviso.anchoredPosition = new Vector2(0f, 42f);
+        rettangoloAvviso.sizeDelta = new Vector2(700f, 86f);
+        avvisoFontDislessia = avvisoOggetto.GetComponent<TextMeshProUGUI>();
+        avvisoFontDislessia.alignment = TextAlignmentOptions.Center;
+        avvisoFontDislessia.fontSize = 23f;
+        avvisoFontDislessia.fontStyle = FontStyles.Bold;
+        avvisoFontDislessia.raycastTarget = false;
+        ConfiguraTestoDinamico(avvisoFontDislessia);
+        avvisoOggetto.GetComponent<CanvasGroup>().alpha = 0f;
+        avvisoOggetto.SetActive(false);
     }
 
     // ==========================================

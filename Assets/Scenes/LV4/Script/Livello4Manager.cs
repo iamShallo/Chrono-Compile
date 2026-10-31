@@ -75,6 +75,7 @@ public class Livello4Manager : MonoBehaviour
         testoTerminale.text = "> STANDBY";
 
         if (pannelloTransizione != null) StartCoroutine(EffettoFadeIn());
+        MenuManager.ApplicaFontAccessibilita();
 
         AggiornaInterfacciaMetaGioco();
     }

@@ -31,7 +31,7 @@ component.
 
 ## Game Structure and Progression
 
-The game is structured as a chronological progression through four historical
+The game is structured as a linear progression through four historical
 paradigms. The menu provides access to a new session, individual levels, the
 achievement panel, and the thesis questionnaire. During a new session,
 `GameAnalytics` resets the session data and the player begins with `LV1`.
@@ -80,9 +80,6 @@ The design is informed by the cognitive load model described by Leppink. The
 interface provides structured objectives and immediate feedback to limit
 unnecessary cognitive demands, while the tasks retain the intrinsic difficulty
 of sequencing, control flow, scope, platform constraints, and edge cases.
-Visual objectives, execution states, and feedback also provide a form of
-cognitive offloading by making processes that would otherwise remain invisible
-more explicit to the player.
 
 The final scene records the results of the session and provides a link to the
 questionnaire used for the empirical component of the thesis.
@@ -164,11 +161,25 @@ the design and evaluation decisions.
   simulated AI chat.
 - Scene transitions, period introductions, fade effects, button animations,
   and screen-shake feedback.
+- Accessibility support through an optional OpenDyslexic font for players with
+  dyslexia.
 - Session statistics, including elapsed time, errors, and help usage.
 - Per-stage, per-level, timed, and global achievements.
 - Final report with a summary of statistics and unlocked achievements.
 - Menu navigation for starting a new session, selecting levels, reviewing
   achievements, opening the thesis questionnaire, and exiting the application.
+
+## Accessibility
+
+The menu includes an accessibility option that replaces the default TextMesh
+Pro font with **OpenDyslexic-Regular**. This option is intended to improve
+readability for students with dyslexia and can be enabled or disabled during
+the game.
+
+When enabled, the setting is saved locally and applied across the menu,
+levels, achievement panels, and dynamically generated interface text. Text
+sizes are adjusted where necessary to preserve the layout. The font asset is
+stored in [`Assets/Resources/OpenDyslexic-Regular.otf`](Assets/Resources/OpenDyslexic-Regular.otf).
 
 ## Requirements
 
@@ -230,6 +241,8 @@ Chrono-Compile/
 │   │       ├── Fine.unity
 │   │       ├── GameAnalytics.cs
 │   │       └── Livello5Manager.cs
+│   ├── Resources/
+│   │   └── OpenDyslexic-Regular.otf
 ├── Packages/
 ├── ProjectSettings/
 └── README.md

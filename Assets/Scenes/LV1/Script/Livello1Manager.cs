@@ -474,6 +474,7 @@ public class Livello1Manager : MonoBehaviour
                 testoHelp.text = "MANUALE OPERATIVO - FASE 3 (L'Accumulatore)\n\nGUIDA:\nConfigura i parametri di incremento e lascia che l'hardware esegua iterazioni multiple accumulando i risultati parziali in memoria.\n\nCENNI STORICI:\nPrima dei linguaggi evoluti, i cicli ripetitivi venivano gestiti salvando temporaneamente i totali parziali in registri dedicati chiamati appunto 'Accumulatori'.";
                 break;
         }
+        MenuManager.ConfiguraTestoAccessibilitaCompatto(testoHelp);
     }
     
     // Ritorno al menu sfumando a NERO
