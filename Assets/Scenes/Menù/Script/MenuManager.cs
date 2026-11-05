@@ -48,6 +48,9 @@ public class MenuManager : MonoBehaviour
 
     void Start()
     {
+        PlayerPrefs.SetInt(ChiaveFontDislessia, 0);
+        PlayerPrefs.Save();
+        InizializzaFontPredefinito();
         AttivaAggiornamentoFontGlobale();
         if (pannelloPrincipale != null) pannelloPrincipale.SetActive(true);
         if (pannelloLivelli != null) pannelloLivelli.SetActive(false);
@@ -97,6 +100,18 @@ public class MenuManager : MonoBehaviour
         ApplicaFontAccessibilita();
     }
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void InizializzaFontPredefinito()
+    {
+        if (fontPredefinito == null)
+        {
+            fontPredefinito = Resources.Load<TMP_FontAsset>(
+                "Fonts & Materials/LiberationSans SDF");
+            if (fontPredefinito == null)
+                fontPredefinito = TMP_Settings.defaultFontAsset;
+        }
+    }
+
     public static bool FontDislessiaAttivo
     {
         get { return PlayerPrefs.GetInt(ChiaveFontDislessia, 0) == 1; }
@@ -122,8 +137,7 @@ public class MenuManager : MonoBehaviour
 
     public static void ApplicaFontAccessibilita()
     {
-        if (fontPredefinito == null)
-            fontPredefinito = TMP_Settings.defaultFontAsset;
+        InizializzaFontPredefinito();
 
         TMP_FontAsset font = FontDislessiaAttivo
             ? OttieniFontAccessibilita()
@@ -139,6 +153,9 @@ public class MenuManager : MonoBehaviour
         foreach (TextMeshProUGUI testo in testi)
         {
             testo.font = font;
+            testo.fontSharedMaterial = font.material;
+            testo.SetVerticesDirty();
+            testo.SetLayoutDirty();
             ApplicaDimensioneTesto(testo);
         }
     }
