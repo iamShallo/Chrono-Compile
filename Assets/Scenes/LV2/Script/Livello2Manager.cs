@@ -85,6 +85,7 @@ public class Livello2Manager : MonoBehaviour
             pannelloTransizione.gameObject.SetActive(true);
             pannelloTransizione.raycastTarget = true;
             pannelloTransizione.color = Color.black;
+            float distanzaIngresso = pannelloTransizione.rectTransform.rect.width * 0.75f;
 
             Image foto = null;
             TextMeshProUGUI testo = null;
@@ -102,7 +103,7 @@ public class Livello2Manager : MonoBehaviour
                 rettangoloFoto.anchorMax = new Vector2(0.85f, 0.75f);
                 rettangoloFoto.offsetMin = Vector2.zero;
                 rettangoloFoto.offsetMax = Vector2.zero;
-                rettangoloFoto.anchoredPosition = new Vector2(entraDaDestra ? 1200f : -1200f, 0f);
+                rettangoloFoto.anchoredPosition = new Vector2(entraDaDestra ? distanzaIngresso : -distanzaIngresso, 0f);
                 rettangoloFoto.localScale = Vector3.one * 0.82f;
                 oggettoFoto.transform.SetAsLastSibling();
             }
@@ -112,7 +113,12 @@ public class Livello2Manager : MonoBehaviour
             testo = oggettoTesto.GetComponent<TextMeshProUGUI>();
             testo.text = $"<size=70%>ARCHIVIO CRONOLOGICO // COORDINATA TEMPORALE</size>\n<b>PERIODO INDIVIDUATO</b>\n{descrizionePeriodo}";
             testo.alignment = TextAlignmentOptions.Center;
-            testo.fontSize = 27f;
+            testo.fontSize = 24f;
+            testo.fontSizeMin = 14f;
+            testo.fontSizeMax = 24f;
+            testo.enableAutoSizing = true;
+            testo.textWrappingMode = TextWrappingModes.Normal;
+            testo.overflowMode = TextOverflowModes.Truncate;
             testo.color = Color.white;
             testo.maxVisibleCharacters = 0;
             testo.raycastTarget = false;
@@ -120,8 +126,8 @@ public class Livello2Manager : MonoBehaviour
                 MenuManager.ConfiguraTestoDinamico(testo);
 
             RectTransform rettangoloTesto = testo.rectTransform;
-            rettangoloTesto.anchorMin = new Vector2(0.12f, 0.08f);
-            rettangoloTesto.anchorMax = new Vector2(0.88f, 0.28f);
+            rettangoloTesto.anchorMin = new Vector2(0.06f, 0.07f);
+            rettangoloTesto.anchorMax = new Vector2(0.94f, 0.30f);
             rettangoloTesto.offsetMin = Vector2.zero;
             rettangoloTesto.offsetMax = Vector2.zero;
             oggettoTesto.transform.SetAsLastSibling();
@@ -134,8 +140,8 @@ public class Livello2Manager : MonoBehaviour
             avviso.color = Color.white;
             avviso.raycastTarget = false;
             RectTransform rettangoloAvviso = avviso.rectTransform;
-            rettangoloAvviso.anchorMin = new Vector2(0.12f, 0.015f);
-            rettangoloAvviso.anchorMax = new Vector2(0.88f, 0.075f);
+            rettangoloAvviso.anchorMin = new Vector2(0.06f, 0.015f);
+            rettangoloAvviso.anchorMax = new Vector2(0.94f, 0.065f);
             rettangoloAvviso.offsetMin = Vector2.zero;
             rettangoloAvviso.offsetMax = Vector2.zero;
             oggettoAvviso.transform.SetAsLastSibling();
@@ -151,7 +157,7 @@ public class Livello2Manager : MonoBehaviour
                 if (foto != null)
                 {
                     foto.rectTransform.anchoredPosition = new Vector2(
-                        Mathf.Lerp(entraDaDestra ? 1200f : -1200f, 0f, andamento), 0f);
+                        Mathf.Lerp(entraDaDestra ? distanzaIngresso : -distanzaIngresso, 0f, andamento), 0f);
                     foto.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.82f, 1f, andamento);
                     foto.color = Color.white;
                 }
@@ -641,7 +647,7 @@ public class Livello2Manager : MonoBehaviour
     public void ApriHelp()
     {
         GameAnalytics.RegistraAiuto();
-        if (inTransizione && livelloCompletato) return;
+        if (inTransizione) return;
         if (pannelloHelp == null || testoHelp == null) return;
 
         if (animazioneHelp != null) StopCoroutine(animazioneHelp);

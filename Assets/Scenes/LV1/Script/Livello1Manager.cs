@@ -468,7 +468,7 @@ public class Livello1Manager : MonoBehaviour
     public void ApriHelp()
     {
         GameAnalytics.RegistraAiuto();
-        if (inTransizione && livelloCompletato) return;
+        if (inTransizione) return;
 
         if (pannelloHelp == null || testoHelp == null) return;
 
