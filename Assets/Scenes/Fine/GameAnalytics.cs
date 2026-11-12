@@ -253,49 +253,22 @@ public static class GameAnalytics
 
     public static string OttieniReportAchievementFinale()
     {
-        int ottenuti = 0;
-        int totale = NumeroLivelli * (FasiPerLivello + AchievementExtraPerLivello + AchievementSpecialiPerLivello) + AchievementSpeciali;
         System.Text.StringBuilder report = new System.Text.StringBuilder("<b>ACHIEVEMENT CHRONO::COMPILE :</b>\n");
 
         for (int livello = 0; livello < NumeroLivelli; livello++)
         {
-            report.AppendLine($"\n<color=#55AAFF>Livello {livello + 1}</color>");
-            for (int fase = 0; fase < FasiPerLivello; fase++)
+            int ottenutiLivello = 0;
+            int totaleLivello = FasiPerLivello + AchievementExtraPerLivello + AchievementSpecialiPerLivello;
+            for (int achievement = 0; achievement < totaleLivello; achievement++)
             {
-                bool ottenuto = achievementOttenuti[livello, fase];
-                if (ottenuto) ottenuti++;
-                report.AppendLine(ottenuto
-                    ? $"<color=#00FF66>[X] {nomiAchievement[livello, fase]}</color>"
-                    : $"<color=#777777>[ ] {nomiAchievement[livello, fase]} (mancante)</color>");
+                if (achievementOttenuti[livello, achievement])
+                    ottenutiLivello++;
             }
 
-            for (int achievement = 0; achievement < AchievementExtraPerLivello; achievement++)
-            {
-                bool ottenuto = achievementOttenuti[livello, FasiPerLivello + achievement];
-                if (ottenuto) ottenuti++;
-                report.AppendLine(ottenuto
-                    ? $"<color=#00FF66>[X] {nomiAchievementExtra[livello, achievement]}</color>"
-                    : $"<color=#777777>[ ] {nomiAchievementExtra[livello, achievement]} (mancante)</color>");
-            }
-            bool specialeLivelloOttenuto = achievementOttenuti[livello, FasiPerLivello + AchievementExtraPerLivello];
-            if (specialeLivelloOttenuto) ottenuti++;
-            report.AppendLine(specialeLivelloOttenuto
-                ? $"<color=#00FF66>[X] {nomiAchievementSpecialiLivello[livello]}</color>"
-                : $"<color=#777777>[ ] {nomiAchievementSpecialiLivello[livello]} (mancante)</color>");
+            report.AppendLine($"\n<color=#55AAFF>Livello {livello + 1}</color> <color=#00FF66>{ottenutiLivello}/{totaleLivello}</color>");
         }
 
-        report.AppendLine("\n<color=#55AAFF>Achievement speciali</color>");
-        for (int achievement = 0; achievement < AchievementSpeciali; achievement++)
-        {
-            bool ottenuto = achievementSpecialiOttenuti[achievement];
-            if (ottenuto) ottenuti++;
-            report.AppendLine(ottenuto
-                ? $"<color=#00FF66>[X] {nomiAchievementSpeciali[achievement]}</color>"
-                : $"<color=#777777>[ ] {nomiAchievementSpeciali[achievement]} (mancante)</color>");
-        }
-
-        report.Insert(0, $"<size=85%><color=#00FF66>{ottenuti}/{totale} ottenuti</color>\n\n");
-        report.Append("</size>");
+        report.AppendLine("\n<color=#FFCC66>La tua prossima sfida ti aspetta: torna al menù e scopri come sbloccare nuovi achievement!</color>");
         return report.ToString();
     }
 
