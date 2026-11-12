@@ -21,8 +21,9 @@ body {
 
 #unity-canvas {
   display: block;
-  width: 100vw;
-  height: 100vh;
+  width: min(100vw, 177.7778vh);
+  height: min(100vh, 56.25vw);
+  aspect-ratio: 16 / 9;
   background: #000;
 }
 
@@ -69,6 +70,6 @@ body {
 }
 
 .unity-mobile #unity-canvas {
-  width: 100vw;
-  height: 100vh;
+  width: min(100vw, 177.7778vh);
+  height: min(100vh, 56.25vw);
 }
