@@ -103,9 +103,18 @@
 
 
       } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "1920px";
-        canvas.style.height = "1080px";
+        // Keep the 16:9 game view entirely inside the browser window.
+        var resizeCanvas = () => {
+          var footerHeight = document.querySelector("#unity-footer").offsetHeight;
+          var scale = Math.min(
+            window.innerWidth / 1920,
+            Math.max(0, window.innerHeight - footerHeight) / 1080
+          );
+          canvas.style.width = `${1920 * scale}px`;
+          canvas.style.height = `${1080 * scale}px`;
+        };
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
       }
 
       document.querySelector("#unity-loading-bar").style.display = "block";
