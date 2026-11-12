@@ -322,12 +322,15 @@ public class AchievementNotification : MonoBehaviour
     [SerializeField] private GameObject pannelloAchievement;
     [SerializeField] private TextMeshProUGUI testoAchievement;
     private RectTransform pannello;
+    private RectTransform rettangoloTesto;
     private CanvasGroup gruppoPannello;
     private TextMeshProUGUI testo;
     private Coroutine animazione;
-    private const float LarghezzaPannello = 460f;
+    private const float MargineBordo = 24f;
+    private const float AltezzaPannello = 116f;
     private bool registrato;
     private Vector2 posizioneVisibile;
+    private float distanzaAnimazione;
 
     private void Awake()
     {
@@ -347,16 +350,55 @@ public class AchievementNotification : MonoBehaviour
         testoAchievement = testoAssociato;
         pannello = pannelloAchievement != null ? pannelloAchievement.GetComponent<RectTransform>() : null;
         testo = testoAchievement;
+        rettangoloTesto = testo != null ? testo.rectTransform : null;
         gruppoPannello = pannelloAchievement != null
             ? pannelloAchievement.GetComponent<CanvasGroup>()
             : null;
 
-        if (pannello == null || testo == null)
+        if (pannello == null || rettangoloTesto == null || testo == null)
         {
             Debug.LogWarning("AchievementNotification richiede un pannello e un testo associati nella scena.", this);
             enabled = false;
             return;
         }
+
+        RectTransform contenitore = pannello.parent as RectTransform;
+        float larghezzaContenitore = contenitore != null ? contenitore.rect.width : 1920f;
+        float larghezzaPannello = Mathf.Clamp(larghezzaContenitore * 0.28f, 300f, 440f);
+        pannello.anchorMin = new Vector2(1f, 0f);
+        pannello.anchorMax = new Vector2(1f, 0f);
+        pannello.pivot = new Vector2(1f, 0f);
+        pannello.sizeDelta = new Vector2(larghezzaPannello, AltezzaPannello);
+        posizioneVisibile = new Vector2(-MargineBordo, MargineBordo);
+        pannello.anchoredPosition = posizioneVisibile;
+        distanzaAnimazione = larghezzaPannello + MargineBordo;
+
+        rettangoloTesto.anchorMin = Vector2.zero;
+        rettangoloTesto.anchorMax = Vector2.one;
+        rettangoloTesto.offsetMin = new Vector2(20f, 12f);
+        rettangoloTesto.offsetMax = new Vector2(-20f, -12f);
+        testo.alignment = TextAlignmentOptions.Left;
+        testo.verticalAlignment = VerticalAlignmentOptions.Middle;
+        testo.fontSize = 26f;
+        testo.fontSizeMin = 18f;
+        testo.fontSizeMax = 26f;
+        testo.enableAutoSizing = true;
+        testo.textWrappingMode = TextWrappingModes.Normal;
+        testo.overflowMode = TextOverflowModes.Truncate;
+        testo.raycastTarget = false;
+
+        Image immaginePannello = pannelloAchievement.GetComponent<Image>();
+        if (immaginePannello != null)
+        {
+            immaginePannello.color = new Color(0.025f, 0.06f, 0.1f, 0.94f);
+            immaginePannello.raycastTarget = false;
+        }
+
+        Outline contorno = pannelloAchievement.GetComponent<Outline>();
+        if (contorno == null)
+            contorno = pannelloAchievement.AddComponent<Outline>();
+        contorno.effectColor = new Color(0.15f, 0.85f, 1f, 0.9f);
+        contorno.effectDistance = new Vector2(2f, 2f);
 
         if (!registrato)
         {
@@ -364,10 +406,11 @@ public class AchievementNotification : MonoBehaviour
             registrato = true;
         }
 
-        posizioneVisibile = pannello.anchoredPosition;
         if (gruppoPannello == null)
             gruppoPannello = pannelloAchievement.AddComponent<CanvasGroup>();
         gruppoPannello.alpha = 0f;
+        gruppoPannello.interactable = false;
+        gruppoPannello.blocksRaycasts = false;
         pannelloAchievement.SetActive(true);
     }
 
@@ -386,8 +429,8 @@ public class AchievementNotification : MonoBehaviour
                          $"<color=#FFFFFF>{codaAchievement.Dequeue()}</color>";
             pannelloAchievement.SetActive(true);
             gruppoPannello.alpha = 0f;
-            float ingresso = posizioneVisibile.x + LarghezzaPannello;
-            float uscita = posizioneVisibile.x + LarghezzaPannello;
+            float ingresso = posizioneVisibile.x + distanzaAnimazione;
+            float uscita = posizioneVisibile.x + distanzaAnimazione;
             yield return StartCoroutine(Scorri(
                 new Vector2(ingresso, posizioneVisibile.y),
                 posizioneVisibile,
