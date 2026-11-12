@@ -7,16 +7,16 @@ using UnityEngine.SceneManagement;
 public class Livello1Manager : MonoBehaviour
 {
     public enum StatoTask { Facile, Media, Difficile }
-    
+
     [Header("Impostazioni Livello")]
     public StatoTask taskCorrente = StatoTask.Facile;
     public TextMeshProUGUI schermoTerminale;
-    public TextMeshProUGUI testoObiettivo; 
+    public TextMeshProUGUI testoObiettivo;
 
     [Header("Barra e Transizione")]
-    public Image barraTemporaleFill; 
-    public GameObject contenitoreBarraTemporale; 
-    public GameObject contenitoreObiettivo;       
+    public Image barraTemporaleFill;
+    public GameObject contenitoreBarraTemporale;
+    public GameObject contenitoreObiettivo;
     public Image pannelloTransizione;
     public Sprite fotoPeriodo;
 
@@ -28,13 +28,13 @@ public class Livello1Manager : MonoBehaviour
     private bool livelloCompletato = false;
 
     [Header("Leve di Comando")]
-    public Toggle levaStatus; 
-    public Toggle levaPower;  
-    public Toggle levaInputA; 
-    public Toggle levaInputB; 
+    public Toggle levaStatus;
+    public Toggle levaPower;
+    public Toggle levaInputA;
+    public Toggle levaInputB;
     public Toggle levaProcess;
-    public Toggle levaOutput; 
-    public Toggle levaLoopExecute; 
+    public Toggle levaOutput;
+    public Toggle levaLoopExecute;
 
     [Header("Sistema Help")]
     public GameObject pannelloHelp;
@@ -60,13 +60,13 @@ public class Livello1Manager : MonoBehaviour
         AchievementNotification notificaAchievement = gameObject.AddComponent<AchievementNotification>();
         notificaAchievement.Configura(pannelloAchievement, testoAchievement);
         GameAnalytics.IniziaLivello(1);
-        if (pannelloHelp != null) 
+        if (pannelloHelp != null)
             pannelloHelp.SetActive(false);
 
-        if (barraTemporaleFill != null) 
+        if (barraTemporaleFill != null)
             barraTemporaleFill.fillAmount = 0f;
 
-        if (immagineBottoneSubmit != null) 
+        if (immagineBottoneSubmit != null)
             coloreOriginaleSubmit = immagineBottoneSubmit.color;
 
         if (levaStatus != null)
@@ -78,20 +78,20 @@ public class Livello1Manager : MonoBehaviour
         SpegniTutteLeLeveSenzaNotifica();
         AggiornaPopupObiettivo();
 
-        if (schermoTerminale != null) 
-            schermoTerminale.text = ""; 
+        if (schermoTerminale != null)
+            schermoTerminale.text = "";
 
         // Avvia direttamente il Fade-In NERO all'inizio
-        if (pannelloTransizione != null) StartCoroutine(EffettoFadeIn());   
+        if (pannelloTransizione != null) StartCoroutine(EffettoFadeIn());
     }
 
     public void ValutaInterruttori()
     {
         if (schermoTerminale == null || levaStatus == null) return;
 
-        if (inTransizione) 
+        if (inTransizione)
         {
-            if (!levaStatus.isOn) 
+            if (!levaStatus.isOn)
                 levaStatus.SetIsOnWithoutNotify(true);
             return;
         }
@@ -132,23 +132,28 @@ public class Livello1Manager : MonoBehaviour
         {
             schermoTerminale.text = ">>> CICLO DI VON NEUMANN COMPLETATO <<<\n[POWER: ON] -> DATI CARICATI [X=12, Y=5]\n[ALU]: ADD(12, 5) = 17\n[OUTPUT]: STAMPATO SU CARTA PERFORATA [17]\n\nSUCCESS! LETTURA RISULTATO IN CORSO...";
             GameAnalytics.SbloccaAchievement(1, 1);
-            StartCoroutine(AvanzaBarraTemporale(0.33f)); 
+            StartCoroutine(AvanzaBarraTemporale(0.33f));
             StartCoroutine(PassaggioFase(StatoTask.Media, 9f));
         }
-        else if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn) { 
-            schermoTerminale.text = "[SISTEMA ATTIVO]\nRegistri A e B letti.\nALU ha calcolato: 12 + 5 = 17.\n\n> AZIONE: Tira la leva OUTPUT per stampare il risultato."; 
+        else if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn)
+        {
+            schermoTerminale.text = "[SISTEMA ATTIVO]\nRegistri A e B letti.\nALU ha calcolato: 12 + 5 = 17.\n\n> AZIONE: Tira la leva OUTPUT per stampare il risultato.";
         }
-        else if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn) { 
-            schermoTerminale.text = "[SISTEMA ATTIVO]\nDati immessi nei registri di memoria.\n\n> AZIONE: Tira la leva PROCESS per far eseguire il calcolo all'ALU."; 
+        else if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn)
+        {
+            schermoTerminale.text = "[SISTEMA ATTIVO]\nDati immessi nei registri di memoria.\n\n> AZIONE: Tira la leva PROCESS per far eseguire il calcolo all'ALU.";
         }
-        else if (levaPower.isOn && (levaInputA.isOn || levaInputB.isOn)) { 
-            schermoTerminale.text = "[SISTEMA ATTIVO]\nIn attesa del caricamento completo di entrambi i registri (A e B)..."; 
+        else if (levaPower.isOn && (levaInputA.isOn || levaInputB.isOn))
+        {
+            schermoTerminale.text = "[SISTEMA ATTIVO]\nIn attesa del caricamento completo di entrambi i registri (A e B)...";
         }
-        else if (levaPower.isOn) { 
-            schermoTerminale.text = "[SISTEMA ATTIVO]\nEnergia principale stabilita.\n\n> AZIONE: Carica i dati nei registri INPUT A e INPUT B."; 
+        else if (levaPower.isOn)
+        {
+            schermoTerminale.text = "[SISTEMA ATTIVO]\nEnergia principale stabilita.\n\n> AZIONE: Carica i dati nei registri INPUT A e INPUT B.";
         }
-        else { 
-            schermoTerminale.text = "[DISPLAY: ONLINE]\nATTENZIONE: Macchina spenta.\n\n> AZIONE: Alimenta il calcolatore azionando POWER."; 
+        else
+        {
+            schermoTerminale.text = "[DISPLAY: ONLINE]\nATTENZIONE: Macchina spenta.\n\n> AZIONE: Alimenta il calcolatore azionando POWER.";
         }
     }
 
@@ -163,20 +168,24 @@ public class Livello1Manager : MonoBehaviour
         {
             schermoTerminale.text = ">>> SALTO CONDIZIONATO ESEGUITO <<<\n[ALU]: 10 + (-15) = -5\n[FLAG NEGATIVO ATTIVO]: Rilevato numero minore di zero.\n[EXECUTE]: Salto logico attivato -> STAMPA SALTATA CON SUCCESSO!\n\nSUCCESS! ANALISI DEL SALTO IN CORSO...";
             GameAnalytics.SbloccaAchievement(1, 2);
-            StartCoroutine(AvanzaBarraTemporale(0.66f)); 
+            StartCoroutine(AvanzaBarraTemporale(0.66f));
             StartCoroutine(PassaggioFase(StatoTask.Difficile, 9f));
         }
-        else if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn) { 
-            schermoTerminale.text = "[CALCOLO ESEGUITO]: Risultato = -5 (NEGATIVO).\nLa regola vieta di stampare i numeri negativi.\n\n> AZIONE: Tira la leva EXECUTE per confermare il salto logico e bypassare la stampa."; 
+        else if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn)
+        {
+            schermoTerminale.text = "[CALCOLO ESEGUITO]: Risultato = -5 (NEGATIVO).\nLa regola vieta di stampare i numeri negativi.\n\n> AZIONE: Tira la leva EXECUTE per confermare il salto logico e bypassare la stampa.";
         }
-        else if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn) { 
-            schermoTerminale.text = "[MEMORIA CARICATA]\nRegistri impostati su X=10 e Y=-15.\n\n> AZIONE: Attiva PROCESS per valutare il segno algebrico."; 
+        else if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn)
+        {
+            schermoTerminale.text = "[MEMORIA CARICATA]\nRegistri impostati su X=10 e Y=-15.\n\n> AZIONE: Attiva PROCESS per valutare il segno algebrico.";
         }
-        else if (levaPower.isOn) { 
-            schermoTerminale.text = "[FASE 2: IL CONTROLLO DI SEGNALE]\nCarica i nuovi dati nei registri per testare la ramificazione logica."; 
+        else if (levaPower.isOn)
+        {
+            schermoTerminale.text = "[FASE 2: IL CONTROLLO DI SEGNALE]\nCarica i nuovi dati nei registri per testare la ramificazione logica.";
         }
-        else { 
-            schermoTerminale.text = "[DISPLAY: ONLINE]\nAttiva il POWER per iniziare la sessione di diramazione logica."; 
+        else
+        {
+            schermoTerminale.text = "[DISPLAY: ONLINE]\nAttiva il POWER per iniziare la sessione di diramazione logica.";
         }
     }
 
@@ -184,11 +193,11 @@ public class Livello1Manager : MonoBehaviour
     {
         if (levaLoopExecute.isOn)
         {
-            if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn && levaOutput.isOn) 
+            if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn && levaOutput.isOn)
             {
                 StartCoroutine(EseguiLoopAutomatico());
-            } 
-            else 
+            }
+            else
             {
                 StartCoroutine(MostraErrore("ERRORE:\nConfigura l'intera sequenza di calcolo prima di delegare l'esecuzione automatica a EXECUTE."));
                 levaLoopExecute.SetIsOnWithoutNotify(false);
@@ -199,24 +208,27 @@ public class Livello1Manager : MonoBehaviour
         if (levaOutput.isOn && !levaProcess.isOn) { StartCoroutine(MostraErrore("ERRORE: Impossibile stampare senza elaborazione.")); return; }
         if (levaProcess.isOn && (!levaInputA.isOn || !levaInputB.isOn)) { StartCoroutine(MostraErrore("ERRORE: Dati di input mancanti.")); return; }
         if ((levaInputA.isOn || levaInputB.isOn) && !levaPower.isOn) { StartCoroutine(MostraErrore("ERRORE: Sistema non alimentato.")); return; }
-        
-        if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn && levaOutput.isOn) {
+
+        if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn && levaOutput.isOn)
+        {
             schermoTerminale.text = "ROUTINE COMPLETA DEFINITA:\n1. Carica incremento (5)\n2. Somma all'Accumulatore\n3. Stampa parziale\n\n> AZIONE: Tira la leva EXECUTE per avviare il ciclo automatico hardware!";
         }
-        else if (levaPower.isOn) { 
-            schermoTerminale.text = "[FASE 3: AUTOMAZIONE CICLICA]\nImposta tutti gli interruttori (A, B, Process, Output) per definire la singola unità di ripetizione del ciclo."; 
+        else if (levaPower.isOn)
+        {
+            schermoTerminale.text = "[FASE 3: AUTOMAZIONE CICLICA]\nImposta tutti gli interruttori (A, B, Process, Output) per definire la singola unità di ripetizione del ciclo.";
         }
-        else {
+        else
+        {
             schermoTerminale.text = "[DISPLAY: ONLINE]\nAttiva il POWER per preparare il circuito iterativo.";
         }
     }
 
     IEnumerator EseguiLoopAutomatico()
     {
-        inTransizione = true; 
+        inTransizione = true;
         schermoTerminale.text = "[HARDWARE OVERRIDE]\nAVVIO CICLO AUTOMATICO DELL'ACCUMULATORE...";
-        
-        yield return new WaitForSeconds(1.5f); 
+
+        yield return new WaitForSeconds(1.5f);
         levaInputA.SetIsOnWithoutNotify(false);
         levaInputB.SetIsOnWithoutNotify(false);
         levaProcess.SetIsOnWithoutNotify(false);
@@ -231,23 +243,23 @@ public class Livello1Manager : MonoBehaviour
             if (!levaStatus.isOn) { schermoTerminale.text = ""; inTransizione = false; yield break; }
 
             schermoTerminale.text = $"[ITERAZIONE {i} DI 3]\nCaricamento incremento X = {incremento}...";
-            yield return new WaitForSeconds(1.2f); 
+            yield return new WaitForSeconds(1.2f);
             levaInputA.isOn = true;
             levaInputB.isOn = true;
-            
+
             schermoTerminale.text = $"[ITERAZIONE {i} DI 3]\n[ACCUMULATORE]: {accumulatore} + {incremento}";
-            yield return new WaitForSeconds(1.2f); 
+            yield return new WaitForSeconds(1.2f);
             levaProcess.isOn = true;
-            
-            accumulatore += incremento; 
-            
+
+            accumulatore += incremento;
+
             schermoTerminale.text = $"[ITERAZIONE {i} DI 3]\nTOTALE PARZIALE IN MEMORIA: {accumulatore}\nTrasmissione a stampante...";
             yield return new WaitForSeconds(1.2f);
             levaOutput.isOn = true;
-            
-            yield return new WaitForSeconds(1.5f); 
-            
-            if (i < 3) 
+
+            yield return new WaitForSeconds(1.5f);
+
+            if (i < 3)
             {
                 levaInputA.SetIsOnWithoutNotify(false);
                 levaInputB.SetIsOnWithoutNotify(false);
@@ -257,13 +269,13 @@ public class Livello1Manager : MonoBehaviour
             }
         }
 
-        yield return StartCoroutine(AvanzaBarraTemporale(1f)); 
-        
+        yield return StartCoroutine(AvanzaBarraTemporale(1f));
+
         livelloCompletato = true;
         GameAnalytics.CompletaLivello(1);
         GameAnalytics.SbloccaAchievement(1, 3);
         schermoTerminale.text = $"[SEQUENZA HARDWARE COMPLETATA]\nVALORE FINALE ACCUMULATORE: {accumulatore}\n\n>>> ERA ANNI '40-'50 COMPLETATA.\n<color=#00FF66>PREMI SUBMIT PER AVVIARE IL SALTO ALL'ERA SUCCESSIVA.</color>";
-        
+
         if (immagineBottoneSubmit != null)
         {
             lampeggioVerdeCoroutine = StartCoroutine(RespiroVerdeContinuo());
@@ -282,7 +294,7 @@ public class Livello1Manager : MonoBehaviour
         {
             if (lampeggioVerdeCoroutine != null) StopCoroutine(lampeggioVerdeCoroutine);
             if (immagineBottoneSubmit != null) immagineBottoneSubmit.color = Color.green;
-            
+
             StartCoroutine(EffettoViaggioNelTempo());
         }
     }
@@ -304,7 +316,7 @@ public class Livello1Manager : MonoBehaviour
         if (immagineBottoneSubmit == null) yield break;
         while (livelloCompletato)
         {
-            float t = (Mathf.Sin(Time.time * 4f) + 1f) / 2f; 
+            float t = (Mathf.Sin(Time.time * 4f) + 1f) / 2f;
             immagineBottoneSubmit.color = Color.Lerp(coloreOriginaleSubmit, Color.green, t);
             yield return null;
         }
@@ -324,7 +336,7 @@ public class Livello1Manager : MonoBehaviour
         if (pannelloTransizione != null)
         {
             pannelloTransizione.gameObject.SetActive(true);
-            pannelloTransizione.raycastTarget = true; 
+            pannelloTransizione.raycastTarget = true;
             pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
 
             float durataFade = 2.5f;
@@ -340,7 +352,7 @@ public class Livello1Manager : MonoBehaviour
         }
 
         yield return StartCoroutine(MostraDebriefing());
-        SceneManager.LoadScene("LV2"); 
+        SceneManager.LoadScene("LV2");
     }
 
     // Fade-in nero iniziale
@@ -354,7 +366,7 @@ public class Livello1Manager : MonoBehaviour
             false);
         inTransizione = false;
     }
-    
+
     IEnumerator AvanzaBarraTemporale(float targetValue)
     {
         if (barraTemporaleFill == null) yield break;
@@ -362,7 +374,8 @@ public class Livello1Manager : MonoBehaviour
         float valoreIniziale = barraTemporaleFill.fillAmount;
         float durataAnimazione = 1.5f;
 
-        while (Time.time < tempoInizio + durataAnimazione) {
+        while (Time.time < tempoInizio + durataAnimazione)
+        {
             float t = (Time.time - tempoInizio) / durataAnimazione;
             barraTemporaleFill.fillAmount = Mathf.Lerp(valoreIniziale, targetValue, t);
             yield return null;
@@ -375,7 +388,7 @@ public class Livello1Manager : MonoBehaviour
         inTransizione = true;
         GameAnalytics.RegistraErrore();
         StartCoroutine(EffettoScreenShake());
-        SpegniTutteLeLeveSenzaNotifica(); 
+        SpegniTutteLeLeveSenzaNotifica();
         schermoTerminale.text = messaggioErrore + "\n\n[RESETTING CIRCUITI]";
         Color coloreOriginale = schermoTerminale != null ? schermoTerminale.color : Color.white;
         if (schermoTerminale != null) schermoTerminale.color = new Color(1f, 0.1f, 0.1f, coloreOriginale.a);
@@ -428,13 +441,13 @@ public class Livello1Manager : MonoBehaviour
             testoDebriefing.text += carattere;
             yield return new WaitForSeconds(0.04f);
         }
-        yield return new WaitForSeconds(2.5f);
+        yield return Livello2Manager.AnimazioneIngressoLivello.AttendiContinuazione(testoDebriefing);
     }
 
     IEnumerator PassaggioFase(StatoTask nuovaFase, float tempoAttesa)
     {
         inTransizione = true;
-        yield return new WaitForSeconds(tempoAttesa); 
+        yield return new WaitForSeconds(tempoAttesa);
         taskCorrente = nuovaFase;
         AggiornaPopupObiettivo();
         SpegniTutteLeLeveSenzaNotifica();
@@ -445,18 +458,18 @@ public class Livello1Manager : MonoBehaviour
     void SpegniTutteLeLeveSenzaNotifica()
     {
         if (levaPower != null) levaPower.SetIsOnWithoutNotify(false);
-        if (levaInputA != null) levaInputA.SetIsOnWithoutNotify(false); 
-        if (levaInputB != null) levaInputB.SetIsOnWithoutNotify(false); 
-        if (levaProcess != null) levaProcess.SetIsOnWithoutNotify(false); 
-        if (levaOutput != null) levaOutput.SetIsOnWithoutNotify(false); 
+        if (levaInputA != null) levaInputA.SetIsOnWithoutNotify(false);
+        if (levaInputB != null) levaInputB.SetIsOnWithoutNotify(false);
+        if (levaProcess != null) levaProcess.SetIsOnWithoutNotify(false);
+        if (levaOutput != null) levaOutput.SetIsOnWithoutNotify(false);
         if (levaLoopExecute != null) levaLoopExecute.SetIsOnWithoutNotify(false);
     }
 
     public void ApriHelp()
     {
         GameAnalytics.RegistraAiuto();
-        if (inTransizione && livelloCompletato) return; 
-        
+        if (inTransizione && livelloCompletato) return;
+
         if (pannelloHelp == null || testoHelp == null) return;
 
         if (animazioneHelp != null) StopCoroutine(animazioneHelp);
@@ -476,15 +489,15 @@ public class Livello1Manager : MonoBehaviour
         }
         MenuManager.ConfiguraTestoAccessibilitaCompatto(testoHelp);
     }
-    
+
     // Ritorno al menu sfumando a NERO
     public void TornaAlMenu()
     {
-        if (inTransizione) return; 
+        if (inTransizione) return;
         StartCoroutine(EffettoFadeMenu());
     }
 
-   IEnumerator EffettoFadeMenu()
+    IEnumerator EffettoFadeMenu()
     {
         inTransizione = true;
 
@@ -492,10 +505,10 @@ public class Livello1Manager : MonoBehaviour
         {
             pannelloTransizione.gameObject.SetActive(true);
             pannelloTransizione.raycastTarget = true; // Blocca i clic sullo schermo
-            
+
             // 1. Inizia NERO TRASPARENTE (alpha = 0)
-            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f); 
-            
+            pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
+
             float durataFade = 1.0f; // Durata del caricamento (1 secondo)
             float tempoInizio = Time.time;
 
@@ -503,16 +516,16 @@ public class Livello1Manager : MonoBehaviour
             {
                 float t = (Time.time - tempoInizio) / durataFade;
                 // 2. L'alpha sale gradualmente con 't'
-                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t)); 
+                pannelloTransizione.color = new Color(0f, 0f, 0f, Mathf.Clamp01(t));
                 yield return null;
             }
-            
+
             // 3. Finisce NERO OPACO (alpha = 1)
             pannelloTransizione.color = new Color(0f, 0f, 0f, 1f);
         }
 
         yield return new WaitForSeconds(0.2f); // Piccola pausa scenica prima di caricare
-        SceneManager.LoadScene("Menu"); 
+        SceneManager.LoadScene("Menu");
     }
 
     public void ChiudiHelp()
@@ -571,14 +584,14 @@ public class Livello1Manager : MonoBehaviour
 
         switch (taskCorrente)
         {
-            case StatoTask.Facile: 
-                testoObiettivo.text = "OBIETTIVO 1: ARCHITETTURA DI BASE\nAccendi STATUS e POWER. Carica i registri A e B, processa i dati con l'ALU e stampa il risultato."; 
+            case StatoTask.Facile:
+                testoObiettivo.text = "OBIETTIVO 1: ARCHITETTURA DI BASE\nAccendi STATUS e POWER. Carica i registri A e B, processa i dati con l'ALU e stampa il risultato.";
                 break;
-            case StatoTask.Media: 
-                testoObiettivo.text = "OBIETTIVO 2: SALTO CONDIZIONATO\nElabora i dati negativi. Ometti l'OUTPUT e aziona EXECUTE per applicare il controllo di flusso."; 
+            case StatoTask.Media:
+                testoObiettivo.text = "OBIETTIVO 2: SALTO CONDIZIONATO\nElabora i dati negativi. Ometti l'OUTPUT e aziona EXECUTE per applicare il controllo di flusso.";
                 break;
-            case StatoTask.Difficile: 
-                testoObiettivo.text = "OBIETTIVO 3: CICLO HARDWARE\nImposta la routine di incremento e tira EXECUTE per avviare il calcolo iterativo automatico."; 
+            case StatoTask.Difficile:
+                testoObiettivo.text = "OBIETTIVO 3: CICLO HARDWARE\nImposta la routine di incremento e tira EXECUTE per avviare il calcolo iterativo automatico.";
                 break;
         }
     }

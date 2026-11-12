@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 
 public class Livello2Manager : MonoBehaviour
 {
@@ -125,6 +126,21 @@ public class Livello2Manager : MonoBehaviour
             rettangoloTesto.offsetMax = Vector2.zero;
             oggettoTesto.transform.SetAsLastSibling();
 
+            GameObject oggettoAvviso = new GameObject("AvvisoClickIngresso", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            oggettoAvviso.transform.SetParent(pannelloTransizione.transform, false);
+            TextMeshProUGUI avviso = oggettoAvviso.GetComponent<TextMeshProUGUI>();
+            avviso.alignment = TextAlignmentOptions.Center;
+            avviso.fontSize = 18f;
+            avviso.color = Color.white;
+            avviso.raycastTarget = false;
+            RectTransform rettangoloAvviso = avviso.rectTransform;
+            rettangoloAvviso.anchorMin = new Vector2(0.12f, 0.015f);
+            rettangoloAvviso.anchorMax = new Vector2(0.88f, 0.075f);
+            rettangoloAvviso.offsetMin = Vector2.zero;
+            rettangoloAvviso.offsetMax = Vector2.zero;
+            oggettoAvviso.transform.SetAsLastSibling();
+            oggettoAvviso.SetActive(false);
+
             float durataIngresso = 3.8f;
             float tempoInizio = Time.time;
             while (Time.time < tempoInizio + durataIngresso)
@@ -145,7 +161,7 @@ public class Livello2Manager : MonoBehaviour
             if (foto != null)
                 foto.rectTransform.anchoredPosition = Vector2.zero;
             yield return ScriviTesto(testo);
-            yield return new WaitForSeconds(5.5f);
+            yield return AttendiClickMouse(avviso, "CLICCA PER SALTO TEMPORALE");
 
             float durataUscita = 3.2f;
             tempoInizio = Time.time;
@@ -174,11 +190,78 @@ public class Livello2Manager : MonoBehaviour
             }
 
             Object.Destroy(oggettoTesto);
+            Object.Destroy(oggettoAvviso);
             if (foto != null)
                 Object.Destroy(foto.gameObject);
             pannelloTransizione.color = new Color(0f, 0f, 0f, 0f);
             pannelloTransizione.raycastTarget = false;
             pannelloTransizione.gameObject.SetActive(false);
+        }
+
+        private static IEnumerator AttendiClickMouse(TextMeshProUGUI avviso, string messaggio)
+        {
+            if (avviso == null)
+                yield break;
+
+            avviso.text = messaggio;
+            avviso.gameObject.SetActive(true);
+            Color coloreOriginale = avviso.color;
+            while (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                float alpha = AlphaLampeggioLento();
+                avviso.color = new Color(coloreOriginale.r, coloreOriginale.g, coloreOriginale.b, coloreOriginale.a * alpha);
+                yield return null;
+            }
+            avviso.color = coloreOriginale;
+            avviso.gameObject.SetActive(false);
+        }
+
+        public static IEnumerator AttendiContinuazione(TextMeshProUGUI testoDebriefing)
+        {
+            if (testoDebriefing == null)
+                yield break;
+
+            Canvas canvas = testoDebriefing.canvas;
+            Transform genitoreAvviso = canvas != null ? canvas.rootCanvas.transform : testoDebriefing.transform.parent;
+            RectTransform areaAvviso = genitoreAvviso as RectTransform;
+            float altezzaAvviso = 44f;
+            float larghezzaAvviso = areaAvviso != null ? areaAvviso.rect.width : testoDebriefing.rectTransform.rect.width;
+
+            GameObject oggettoAvviso = new GameObject("AvvisoContinuazioneDebriefing", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            oggettoAvviso.transform.SetParent(genitoreAvviso, false);
+            oggettoAvviso.transform.SetAsLastSibling();
+            TextMeshProUGUI avviso = oggettoAvviso.GetComponent<TextMeshProUGUI>();
+            avviso.text = "CLICCA PER CONTINUARE";
+            avviso.font = testoDebriefing.font;
+            avviso.fontSharedMaterial = testoDebriefing.fontSharedMaterial;
+            avviso.fontSize = testoDebriefing.fontSize * 0.8f;
+            avviso.fontStyle = FontStyles.Bold;
+            avviso.alignment = TextAlignmentOptions.Center;
+            avviso.verticalAlignment = VerticalAlignmentOptions.Middle;
+            avviso.color = testoDebriefing.color;
+            avviso.raycastTarget = false;
+
+            RectTransform rettangoloAvviso = avviso.rectTransform;
+            rettangoloAvviso.anchorMin = new Vector2(0.5f, 0f);
+            rettangoloAvviso.anchorMax = new Vector2(0.5f, 0f);
+            rettangoloAvviso.pivot = new Vector2(0.5f, 0f);
+            rettangoloAvviso.sizeDelta = new Vector2(larghezzaAvviso, altezzaAvviso);
+            rettangoloAvviso.anchoredPosition = new Vector2(0f, 12f);
+
+            Color coloreOriginale = avviso.color;
+            while (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                float alpha = AlphaLampeggioLento();
+                avviso.color = new Color(coloreOriginale.r, coloreOriginale.g, coloreOriginale.b, coloreOriginale.a * alpha);
+                yield return null;
+            }
+            avviso.color = coloreOriginale;
+            Object.Destroy(oggettoAvviso);
+        }
+
+        private static float AlphaLampeggioLento()
+        {
+            return Mathf.Lerp(0.35f, 1f, (Mathf.Sin(Time.unscaledTime * 2f) + 1f) * 0.5f);
         }
 
         private static IEnumerator ScriviTesto(TextMeshProUGUI testo)
@@ -344,7 +427,7 @@ public class Livello2Manager : MonoBehaviour
             testoDebriefing.text += carattere;
             yield return new WaitForSeconds(0.04f);
         }
-        yield return new WaitForSeconds(2.5f);
+        yield return AnimazioneIngressoLivello.AttendiContinuazione(testoDebriefing);
     }
 
     // ==========================================

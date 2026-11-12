@@ -442,7 +442,7 @@ IEnumerator EffettoFadeIn()
             testoDebriefing.text += carattere;
             yield return new WaitForSeconds(0.04f);
         }
-        yield return new WaitForSeconds(2.5f);
+        yield return Livello2Manager.AnimazioneIngressoLivello.AttendiContinuazione(testoDebriefing);
     }
 
     IEnumerator FlashRosso(Image bottoneImg, Color coloreOriginale)
