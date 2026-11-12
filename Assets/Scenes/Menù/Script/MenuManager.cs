@@ -32,6 +32,7 @@ public class MenuManager : MonoBehaviour
     private bool inCaricamento = false; // Impedisce di cliccare più bottoni insieme
     private CanvasGroup gruppoAchievement;
     private RectTransform rettangoloAchievement;
+    private ScrollRect scorrimentoAchievement;
     private Coroutine animazioneAchievement;
     private const float ScalaInizialeAchievement = 0.85f;
 
@@ -63,8 +64,10 @@ public class MenuManager : MonoBehaviour
 
         if (pannelloAchievement != null)
         {
+            ConfiguraPannelloTestoResponsive(pannelloAchievement, testoAchievement);
             rettangoloAchievement = pannelloAchievement.GetComponent<RectTransform>();
             gruppoAchievement = pannelloAchievement.GetComponent<CanvasGroup>();
+            scorrimentoAchievement = pannelloAchievement.GetComponent<ScrollRect>();
             if (gruppoAchievement == null)
                 gruppoAchievement = pannelloAchievement.AddComponent<CanvasGroup>();
 
@@ -191,6 +194,113 @@ public class MenuManager : MonoBehaviour
         ConfiguraTestoDinamico(testo);
         if (FontDislessiaAttivo && dimensioniTestoOriginali.ContainsKey(testo))
             testo.fontSize = dimensioniTestoOriginali[testo] * 0.55f;
+    }
+
+    public static void ConfiguraPannelloTestoResponsive(GameObject pannello, TextMeshProUGUI testo)
+    {
+        if (pannello == null || testo == null)
+            return;
+
+        RectTransform rettangoloPannello = pannello.GetComponent<RectTransform>();
+        if (rettangoloPannello == null)
+            return;
+
+        RectTransform contenitore = rettangoloPannello.parent as RectTransform;
+        float larghezzaContenitore = contenitore != null && contenitore.rect.width > 0f
+            ? contenitore.rect.width
+            : 1920f;
+        float altezzaContenitore = contenitore != null && contenitore.rect.height > 0f
+            ? contenitore.rect.height
+            : 1080f;
+
+        rettangoloPannello.anchorMin = new Vector2(0.5f, 0.5f);
+        rettangoloPannello.anchorMax = new Vector2(0.5f, 0.5f);
+        rettangoloPannello.pivot = new Vector2(0.5f, 0.5f);
+        rettangoloPannello.anchoredPosition = Vector2.zero;
+        float larghezzaPannello = Mathf.Min(1200f, larghezzaContenitore * 0.9f);
+        rettangoloPannello.sizeDelta = new Vector2(
+            larghezzaPannello,
+            Mathf.Min(900f, altezzaContenitore * 0.88f));
+
+        Image immaginePannello = pannello.GetComponent<Image>();
+        if (immaginePannello != null)
+        {
+            immaginePannello.color = new Color(0.025f, 0.06f, 0.1f, 0.97f);
+            immaginePannello.raycastTarget = true;
+        }
+
+        Outline contorno = pannello.GetComponent<Outline>();
+        if (contorno == null)
+            contorno = pannello.AddComponent<Outline>();
+        contorno.effectColor = new Color(0.15f, 0.85f, 1f, 0.9f);
+        contorno.effectDistance = new Vector2(2f, 2f);
+
+        RectTransform areaTesto = pannello.transform.Find("HelpViewport") as RectTransform;
+        if (areaTesto == null)
+        {
+            GameObject areaTestoOggetto = new GameObject("HelpViewport", typeof(RectTransform), typeof(RectMask2D));
+            areaTesto = areaTestoOggetto.GetComponent<RectTransform>();
+            areaTesto.SetParent(pannello.transform, false);
+        }
+
+        areaTesto.anchorMin = Vector2.zero;
+        areaTesto.anchorMax = Vector2.one;
+        areaTesto.pivot = new Vector2(0.5f, 0.5f);
+        areaTesto.offsetMin = new Vector2(32f, 28f);
+        areaTesto.offsetMax = new Vector2(-32f, -84f);
+        areaTesto.SetAsFirstSibling();
+
+        RectTransform rettangoloTesto = testo.rectTransform;
+        rettangoloTesto.SetParent(areaTesto, false);
+        rettangoloTesto.anchorMin = new Vector2(0f, 1f);
+        rettangoloTesto.anchorMax = new Vector2(1f, 1f);
+        rettangoloTesto.pivot = new Vector2(0.5f, 1f);
+        rettangoloTesto.anchoredPosition = Vector2.zero;
+        rettangoloTesto.sizeDelta = Vector2.zero;
+
+        ContentSizeFitter adattatoreTesto = testo.GetComponent<ContentSizeFitter>();
+        if (adattatoreTesto == null)
+            adattatoreTesto = testo.gameObject.AddComponent<ContentSizeFitter>();
+        adattatoreTesto.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        adattatoreTesto.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        ScrollRect scorrimento = pannello.GetComponent<ScrollRect>();
+        if (scorrimento == null)
+            scorrimento = pannello.AddComponent<ScrollRect>();
+        scorrimento.viewport = areaTesto;
+        scorrimento.content = rettangoloTesto;
+        scorrimento.horizontal = false;
+        scorrimento.vertical = true;
+        scorrimento.movementType = ScrollRect.MovementType.Clamped;
+        scorrimento.inertia = true;
+        scorrimento.scrollSensitivity = 30f;
+        scorrimento.StopMovement();
+        rettangoloTesto.anchoredPosition = Vector2.zero;
+
+        testo.alignment = TextAlignmentOptions.Left;
+        testo.verticalAlignment = VerticalAlignmentOptions.Top;
+        testo.fontSize = Mathf.Clamp(larghezzaPannello / 48f, 15f, 25f);
+        testo.enableAutoSizing = false;
+        testo.textWrappingMode = TextWrappingModes.Normal;
+        testo.overflowMode = TextOverflowModes.Overflow;
+        testo.raycastTarget = false;
+
+        foreach (Button bottone in pannello.GetComponentsInChildren<Button>(true))
+        {
+            RectTransform rettangoloBottone = bottone.GetComponent<RectTransform>();
+            rettangoloBottone.anchorMin = Vector2.one;
+            rettangoloBottone.anchorMax = Vector2.one;
+            rettangoloBottone.pivot = Vector2.one;
+            rettangoloBottone.anchoredPosition = new Vector2(-20f, -18f);
+            rettangoloBottone.sizeDelta = new Vector2(64f, 48f);
+            bottone.transform.SetAsLastSibling();
+        }
+
+        CanvasGroup gruppoPannello = pannello.GetComponent<CanvasGroup>();
+        if (gruppoPannello == null)
+            gruppoPannello = pannello.AddComponent<CanvasGroup>();
+        gruppoPannello.interactable = true;
+        gruppoPannello.blocksRaycasts = true;
     }
 
     private void ConfiguraBottoneFontDislessia()
@@ -407,13 +517,19 @@ public class MenuManager : MonoBehaviour
     {
         if (inCaricamento || pannelloAchievement == null || testoAchievement == null) return;
 
-        testoAchievement.text = GameAnalytics.OttieniReportAchievement();
         if (animazioneAchievement != null)
             StopCoroutine(animazioneAchievement);
 
         rettangoloAchievement.localScale = Vector3.one * ScalaInizialeAchievement;
         gruppoAchievement.alpha = 0f;
         pannelloAchievement.SetActive(true);
+        testoAchievement.text = GameAnalytics.OttieniReportAchievement();
+        Canvas.ForceUpdateCanvases();
+        if (scorrimentoAchievement != null)
+        {
+            scorrimentoAchievement.StopMovement();
+            scorrimentoAchievement.verticalNormalizedPosition = 1f;
+        }
         animazioneAchievement = StartCoroutine(AnimaAchievement(ScalaInizialeAchievement, 1f, 0f, 1f));
     }
 

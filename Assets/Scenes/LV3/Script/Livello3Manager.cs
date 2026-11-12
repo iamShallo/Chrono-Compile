@@ -577,10 +577,6 @@ public class Livello3Manager : MonoBehaviour
         if (inTransizione) return;
         if (pannelloHelp == null || testoHelp == null) return;
 
-        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
-        pannelloHelp.SetActive(true);
-        animazioneHelp = StartCoroutine(AnimaApriHelp());
-
         switch (taskCorrente)
         {
             case StatoTask.Facile:
@@ -593,6 +589,11 @@ public class Livello3Manager : MonoBehaviour
                 testoHelp.text = "MANUALE ANNI '90 - FASE 3 (Visual Loop e Scope)\n\nGUIDA:\nScegli il blocco 'LOOP'. Assicurati di inserire l'operazione e l'incremento del contatore al suo interno.\n\nCENNI STORICI:\nL'approccio a blocchi visivi introduce fisicamente il concetto di 'Scope' (l'ambito di visibilità). Le parentesi graffe { } in Java, così come la cornice grafica del blocco Loop, creano un ambiente chiuso e protetto per le variabili. Un concetto che ispirerà profondamente gli ambienti educativi moderni.";
                 break;
         }
+        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
+        MenuManager.ConfiguraTestoAccessibilitaCompatto(testoHelp);
+        MenuManager.ConfiguraPannelloTestoResponsive(pannelloHelp, testoHelp);
+        pannelloHelp.SetActive(true);
+        animazioneHelp = StartCoroutine(AnimaApriHelp());
     }
 
     public void ChiudiHelp()

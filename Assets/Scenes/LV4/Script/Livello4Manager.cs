@@ -474,10 +474,6 @@ IEnumerator EffettoFadeIn()
         if (inTransizione) return; 
         if (pannelloHelp == null || testoHelp == null) return;
         
-        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
-        pannelloHelp.SetActive(true);
-        animazioneHelp = StartCoroutine(AnimaApriHelp());
-
         switch (taskCorrente)
         {
             case StatoTask.Facile:
@@ -490,6 +486,11 @@ IEnumerator EffettoFadeIn()
                 testoHelp.text = "MANUALE 2020+ - FASE 3 (Il Prompt Engineering)\n\nGUIDA:\nDefinisci vincoli esatti per il ciclo iterativo, inserendo numeri o limiti.\n\nANALISI COGNITIVA:\nIl linguaggio naturale è ambiguo, mentre il codice era deterministico. La sfida suprema del programmatore moderno (Prompt Engineer) è usare l'italiano o l'inglese con la stessa precisione chirurgica che si usava per il C++ o il Java, per non far deragliare l'AI.";
                 break;
         }
+        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
+        MenuManager.ConfiguraTestoAccessibilitaCompatto(testoHelp);
+        MenuManager.ConfiguraPannelloTestoResponsive(pannelloHelp, testoHelp);
+        pannelloHelp.SetActive(true);
+        animazioneHelp = StartCoroutine(AnimaApriHelp());
     }
     
 // ==========================================

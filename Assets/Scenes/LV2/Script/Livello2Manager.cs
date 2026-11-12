@@ -650,10 +650,6 @@ public class Livello2Manager : MonoBehaviour
         if (inTransizione) return;
         if (pannelloHelp == null || testoHelp == null) return;
 
-        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
-        pannelloHelp.SetActive(true);
-        animazioneHelp = StartCoroutine(AnimaApriHelp());
-
         switch (taskCorrente)
         {
             case StatoTask.Facile:
@@ -666,6 +662,11 @@ public class Livello2Manager : MonoBehaviour
                 testoHelp.text = "MANUALE ANNI '60-'70 - FASE 3 (Il Ciclo FOR)\n\nGUIDA:\nUn ciclo con un contatore non deve essere gestito con salti manuali e incrementi sparsi. Il costrutto FOR compatta tutto in una sola riga.\n\nCENNI STORICI:\nIl teorema di Bohm-Jacopini dimostro' che ogni algoritmo puo' essere scritto con Sequenza, Selezione e Iterazione. L'incapsulamento dei cicli in costrutti come FOR e WHILE ha reso il codice compatto, seppellendo per sempre l'era dei salti di riga.";
                 break;
         }
+        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
+        MenuManager.ConfiguraTestoAccessibilitaCompatto(testoHelp);
+        MenuManager.ConfiguraPannelloTestoResponsive(pannelloHelp, testoHelp);
+        pannelloHelp.SetActive(true);
+        animazioneHelp = StartCoroutine(AnimaApriHelp());
     }
 
     public void ChiudiHelp()

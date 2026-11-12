@@ -472,9 +472,6 @@ public class Livello1Manager : MonoBehaviour
 
         if (pannelloHelp == null || testoHelp == null) return;
 
-        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
-        pannelloHelp.SetActive(true);
-        animazioneHelp = StartCoroutine(AnimaApriHelp());
         switch (taskCorrente)
         {
             case StatoTask.Facile:
@@ -487,7 +484,11 @@ public class Livello1Manager : MonoBehaviour
                 testoHelp.text = "MANUALE OPERATIVO - FASE 3 (L'Accumulatore)\n\nGUIDA:\nConfigura i parametri di incremento e lascia che l'hardware esegua iterazioni multiple accumulando i risultati parziali in memoria.\n\nCENNI STORICI:\nPrima dei linguaggi evoluti, i cicli ripetitivi venivano gestiti salvando temporaneamente i totali parziali in registri dedicati chiamati appunto 'Accumulatori'.";
                 break;
         }
+        if (animazioneHelp != null) StopCoroutine(animazioneHelp);
         MenuManager.ConfiguraTestoAccessibilitaCompatto(testoHelp);
+        MenuManager.ConfiguraPannelloTestoResponsive(pannelloHelp, testoHelp);
+        pannelloHelp.SetActive(true);
+        animazioneHelp = StartCoroutine(AnimaApriHelp());
     }
 
     // Ritorno al menu sfumando a NERO
