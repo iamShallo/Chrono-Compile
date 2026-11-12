@@ -591,7 +591,7 @@ public class Livello3Manager : MonoBehaviour
         }
         if (animazioneHelp != null) StopCoroutine(animazioneHelp);
         MenuManager.ConfiguraTestoAccessibilitaCompatto(testoHelp);
-        MenuManager.ConfiguraPannelloTestoResponsive(pannelloHelp, testoHelp);
+        MenuManager.ConfiguraPannelloHelpResponsive(pannelloHelp, testoHelp);
         pannelloHelp.SetActive(true);
         animazioneHelp = StartCoroutine(AnimaApriHelp());
     }

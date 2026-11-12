@@ -32,7 +32,6 @@ public class MenuManager : MonoBehaviour
     private bool inCaricamento = false; // Impedisce di cliccare più bottoni insieme
     private CanvasGroup gruppoAchievement;
     private RectTransform rettangoloAchievement;
-    private ScrollRect scorrimentoAchievement;
     private Coroutine animazioneAchievement;
     private const float ScalaInizialeAchievement = 0.85f;
 
@@ -64,10 +63,8 @@ public class MenuManager : MonoBehaviour
 
         if (pannelloAchievement != null)
         {
-            ConfiguraPannelloTestoResponsive(pannelloAchievement, testoAchievement);
             rettangoloAchievement = pannelloAchievement.GetComponent<RectTransform>();
             gruppoAchievement = pannelloAchievement.GetComponent<CanvasGroup>();
-            scorrimentoAchievement = pannelloAchievement.GetComponent<ScrollRect>();
             if (gruppoAchievement == null)
                 gruppoAchievement = pannelloAchievement.AddComponent<CanvasGroup>();
 
@@ -196,7 +193,7 @@ public class MenuManager : MonoBehaviour
             testo.fontSize = dimensioniTestoOriginali[testo] * 0.55f;
     }
 
-    public static void ConfiguraPannelloTestoResponsive(GameObject pannello, TextMeshProUGUI testo)
+    public static void ConfiguraPannelloHelpResponsive(GameObject pannello, TextMeshProUGUI testo)
     {
         if (pannello == null || testo == null)
             return;
@@ -213,11 +210,11 @@ public class MenuManager : MonoBehaviour
             ? contenitore.rect.height
             : 1080f;
 
-        rettangoloPannello.anchorMin = new Vector2(0.5f, 0.5f);
-        rettangoloPannello.anchorMax = new Vector2(0.5f, 0.5f);
-        rettangoloPannello.pivot = new Vector2(0.5f, 0.5f);
-        rettangoloPannello.anchoredPosition = Vector2.zero;
-        float larghezzaPannello = Mathf.Min(1200f, larghezzaContenitore * 0.9f);
+        float larghezzaPannello = Mathf.Min(560f, larghezzaContenitore * 0.34f);
+        rettangoloPannello.anchorMin = new Vector2(0f, 0.5f);
+        rettangoloPannello.anchorMax = new Vector2(0f, 0.5f);
+        rettangoloPannello.pivot = new Vector2(0f, 0.5f);
+        rettangoloPannello.anchoredPosition = new Vector2(24f, 0f);
         rettangoloPannello.sizeDelta = new Vector2(
             larghezzaPannello,
             Mathf.Min(900f, altezzaContenitore * 0.88f));
@@ -279,8 +276,10 @@ public class MenuManager : MonoBehaviour
 
         testo.alignment = TextAlignmentOptions.Left;
         testo.verticalAlignment = VerticalAlignmentOptions.Top;
-        testo.fontSize = Mathf.Clamp(larghezzaPannello / 48f, 15f, 25f);
-        testo.enableAutoSizing = false;
+        testo.fontSize = Mathf.Clamp(larghezzaPannello / 34f, 15f, 25f);
+        testo.fontSizeMin = 14f;
+        testo.fontSizeMax = testo.fontSize;
+        testo.enableAutoSizing = true;
         testo.textWrappingMode = TextWrappingModes.Normal;
         testo.overflowMode = TextOverflowModes.Overflow;
         testo.raycastTarget = false;
@@ -524,12 +523,6 @@ public class MenuManager : MonoBehaviour
         gruppoAchievement.alpha = 0f;
         pannelloAchievement.SetActive(true);
         testoAchievement.text = GameAnalytics.OttieniReportAchievement();
-        Canvas.ForceUpdateCanvases();
-        if (scorrimentoAchievement != null)
-        {
-            scorrimentoAchievement.StopMovement();
-            scorrimentoAchievement.verticalNormalizedPosition = 1f;
-        }
         animazioneAchievement = StartCoroutine(AnimaAchievement(ScalaInizialeAchievement, 1f, 0f, 1f));
     }
 
