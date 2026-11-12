@@ -270,6 +270,30 @@ public class MenuManager : MonoBehaviour
             rettangoloBottone.pivot = Vector2.one;
             rettangoloBottone.anchoredPosition = new Vector2(-20f, -18f);
             rettangoloBottone.sizeDelta = new Vector2(64f, 48f);
+
+            Image immagineBottone = bottone.GetComponent<Image>();
+            if (immagineBottone != null)
+                immagineBottone.color = new Color(0.04f, 0.18f, 0.28f, 0.95f);
+
+            foreach (TextMeshProUGUI etichetta in bottone.GetComponentsInChildren<TextMeshProUGUI>(true))
+            {
+                RectTransform rettangoloEtichetta = etichetta.rectTransform;
+                rettangoloEtichetta.anchorMin = Vector2.zero;
+                rettangoloEtichetta.anchorMax = Vector2.one;
+                rettangoloEtichetta.pivot = new Vector2(0.5f, 0.5f);
+                rettangoloEtichetta.anchoredPosition = Vector2.zero;
+                rettangoloEtichetta.offsetMin = Vector2.zero;
+                rettangoloEtichetta.offsetMax = Vector2.zero;
+                rettangoloEtichetta.localScale = Vector3.one;
+                etichetta.alignment = TextAlignmentOptions.Center;
+                etichetta.verticalAlignment = VerticalAlignmentOptions.Middle;
+                etichetta.fontSize = 28f;
+                etichetta.fontSizeMin = 20f;
+                etichetta.fontSizeMax = 32f;
+                etichetta.enableAutoSizing = true;
+                etichetta.raycastTarget = false;
+            }
+
             bottone.transform.SetAsLastSibling();
         }
 
