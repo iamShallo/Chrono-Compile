@@ -461,7 +461,7 @@ public class MenuManager : MonoBehaviour
     public void ApriForm()
     {
         if (inCaricamento) return;
-        Application.OpenURL("https://forms.gle/xjPnizdEX5kb1teL9");
+        Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSfDlH9NSJmjMWG__ETkYMKI3LbaTiKRsv11I60BZ_ZuhfiX_A/viewform?usp=sharing&ouid=109398919092185628014");
     }
 
     public void EsciDalGioco()

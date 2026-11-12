@@ -33,7 +33,7 @@ public class Livello5Manager : MonoBehaviour
     // Mantiene disponibile l'azione per eventuali collegamenti futuri.
     public void ApriFormTesi()
     {
-        Application.OpenURL("https://forms.gle/xjPnizdEX5kb1teL9");
+        Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSfDlH9NSJmjMWG__ETkYMKI3LbaTiKRsv11I60BZ_ZuhfiX_A/viewform?usp=sharing&ouid=109398919092185628014");
     }
 
     // Collega questo al bottone "TORNA AL MENU"
