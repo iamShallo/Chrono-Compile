@@ -222,7 +222,7 @@ public class MenuManager : MonoBehaviour
         Image immaginePannello = pannello.GetComponent<Image>();
         if (immaginePannello != null)
         {
-            immaginePannello.color = new Color(0.025f, 0.06f, 0.1f, 0.97f);
+            immaginePannello.color = new Color(0.005f, 0.01f, 0.025f, 0.97f);
             immaginePannello.raycastTarget = true;
         }
 
@@ -232,56 +232,34 @@ public class MenuManager : MonoBehaviour
         contorno.effectColor = new Color(0.15f, 0.85f, 1f, 0.9f);
         contorno.effectDistance = new Vector2(2f, 2f);
 
-        RectTransform areaTesto = pannello.transform.Find("HelpViewport") as RectTransform;
-        if (areaTesto == null)
-        {
-            GameObject areaTestoOggetto = new GameObject("HelpViewport", typeof(RectTransform), typeof(RectMask2D));
-            areaTesto = areaTestoOggetto.GetComponent<RectTransform>();
-            areaTesto.SetParent(pannello.transform, false);
-        }
-
-        areaTesto.anchorMin = Vector2.zero;
-        areaTesto.anchorMax = Vector2.one;
-        areaTesto.pivot = new Vector2(0.5f, 0.5f);
-        areaTesto.offsetMin = new Vector2(32f, 28f);
-        areaTesto.offsetMax = new Vector2(-32f, -84f);
-        areaTesto.SetAsFirstSibling();
-
         RectTransform rettangoloTesto = testo.rectTransform;
-        rettangoloTesto.SetParent(areaTesto, false);
-        rettangoloTesto.anchorMin = new Vector2(0f, 1f);
-        rettangoloTesto.anchorMax = new Vector2(1f, 1f);
-        rettangoloTesto.pivot = new Vector2(0.5f, 1f);
+        rettangoloTesto.SetParent(pannello.transform, false);
+        rettangoloTesto.anchorMin = Vector2.zero;
+        rettangoloTesto.anchorMax = Vector2.one;
+        rettangoloTesto.pivot = new Vector2(0.5f, 0.5f);
         rettangoloTesto.anchoredPosition = Vector2.zero;
-        rettangoloTesto.sizeDelta = Vector2.zero;
+        rettangoloTesto.offsetMin = new Vector2(32f, 28f);
+        rettangoloTesto.offsetMax = new Vector2(-32f, -84f);
 
         ContentSizeFitter adattatoreTesto = testo.GetComponent<ContentSizeFitter>();
-        if (adattatoreTesto == null)
-            adattatoreTesto = testo.gameObject.AddComponent<ContentSizeFitter>();
-        adattatoreTesto.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        adattatoreTesto.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        if (adattatoreTesto != null)
+            Object.Destroy(adattatoreTesto);
+        ScrollRect scorrimentoPrecedente = pannello.GetComponent<ScrollRect>();
+        if (scorrimentoPrecedente != null)
+            Object.Destroy(scorrimentoPrecedente);
 
-        ScrollRect scorrimento = pannello.GetComponent<ScrollRect>();
-        if (scorrimento == null)
-            scorrimento = pannello.AddComponent<ScrollRect>();
-        scorrimento.viewport = areaTesto;
-        scorrimento.content = rettangoloTesto;
-        scorrimento.horizontal = false;
-        scorrimento.vertical = true;
-        scorrimento.movementType = ScrollRect.MovementType.Clamped;
-        scorrimento.inertia = true;
-        scorrimento.scrollSensitivity = 30f;
-        scorrimento.StopMovement();
-        rettangoloTesto.anchoredPosition = Vector2.zero;
+        RectTransform areaTestoPrecedente = pannello.transform.Find("HelpViewport") as RectTransform;
+        if (areaTestoPrecedente != null)
+            Object.Destroy(areaTestoPrecedente.gameObject);
 
         testo.alignment = TextAlignmentOptions.Left;
         testo.verticalAlignment = VerticalAlignmentOptions.Top;
-        testo.fontSize = Mathf.Clamp(larghezzaPannello / 34f, 15f, 25f);
-        testo.fontSizeMin = 14f;
+        testo.fontSize = Mathf.Clamp(larghezzaPannello / 18f, 20f, 34f);
+        testo.fontSizeMin = Mathf.Min(18f, testo.fontSize);
         testo.fontSizeMax = testo.fontSize;
         testo.enableAutoSizing = true;
         testo.textWrappingMode = TextWrappingModes.Normal;
-        testo.overflowMode = TextOverflowModes.Overflow;
+        testo.overflowMode = TextOverflowModes.Truncate;
         testo.raycastTarget = false;
 
         foreach (Button bottone in pannello.GetComponentsInChildren<Button>(true))
@@ -300,6 +278,60 @@ public class MenuManager : MonoBehaviour
             gruppoPannello = pannello.AddComponent<CanvasGroup>();
         gruppoPannello.interactable = true;
         gruppoPannello.blocksRaycasts = true;
+    }
+
+    public static IEnumerator AnimaPannelloHelp(GameObject pannello, bool apertura, float durata = 0.3f)
+    {
+        if (pannello == null)
+            yield break;
+
+        RectTransform rettangolo = pannello.GetComponent<RectTransform>();
+        if (rettangolo == null)
+            yield break;
+
+        CanvasGroup gruppo = pannello.GetComponent<CanvasGroup>();
+        if (gruppo == null)
+            gruppo = pannello.AddComponent<CanvasGroup>();
+
+        Vector2 posizioneVisibile = rettangolo.anchoredPosition;
+        Vector2 posizioneFuoriSchermo = posizioneVisibile + Vector2.down * (rettangolo.rect.height + 32f);
+        float tempoInizio = Time.unscaledTime;
+        float durataAnimazione = Mathf.Max(0.01f, durata);
+
+        if (apertura)
+        {
+            pannello.SetActive(true);
+            rettangolo.anchoredPosition = posizioneFuoriSchermo;
+            gruppo.alpha = 0f;
+            gruppo.interactable = false;
+            gruppo.blocksRaycasts = false;
+        }
+
+        Vector2 posizioneIniziale = apertura ? posizioneFuoriSchermo : rettangolo.anchoredPosition;
+        Vector2 posizioneFinale = apertura ? posizioneVisibile : posizioneFuoriSchermo;
+        float alphaIniziale = apertura ? 0f : gruppo.alpha;
+        float alphaFinale = apertura ? 1f : 0f;
+
+        while (Time.unscaledTime < tempoInizio + durataAnimazione)
+        {
+            float progresso = Mathf.Clamp01((Time.unscaledTime - tempoInizio) / durataAnimazione);
+            progresso = 1f - Mathf.Pow(1f - progresso, 3f);
+            rettangolo.anchoredPosition = Vector2.LerpUnclamped(posizioneIniziale, posizioneFinale, progresso);
+            gruppo.alpha = Mathf.Lerp(alphaIniziale, alphaFinale, progresso);
+            yield return null;
+        }
+
+        rettangolo.anchoredPosition = apertura ? posizioneVisibile : posizioneFuoriSchermo;
+        gruppo.alpha = alphaFinale;
+        gruppo.interactable = apertura;
+        gruppo.blocksRaycasts = apertura;
+
+        if (!apertura)
+        {
+            pannello.SetActive(false);
+            rettangolo.anchoredPosition = posizioneVisibile;
+            gruppo.alpha = 1f;
+        }
     }
 
     private void ConfiguraBottoneFontDislessia()

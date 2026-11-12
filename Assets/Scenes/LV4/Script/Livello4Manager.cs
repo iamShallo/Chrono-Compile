@@ -489,8 +489,7 @@ IEnumerator EffettoFadeIn()
         if (animazioneHelp != null) StopCoroutine(animazioneHelp);
         MenuManager.ConfiguraTestoAccessibilitaCompatto(testoHelp);
         MenuManager.ConfiguraPannelloHelpResponsive(pannelloHelp, testoHelp);
-        pannelloHelp.SetActive(true);
-        animazioneHelp = StartCoroutine(AnimaApriHelp());
+        animazioneHelp = StartCoroutine(MenuManager.AnimaPannelloHelp(pannelloHelp, true));
     }
     
 // ==========================================
@@ -539,49 +538,6 @@ IEnumerator EffettoFadeMenu()
     {
         if (pannelloHelp == null) return;
         if (animazioneHelp != null) StopCoroutine(animazioneHelp);
-        animazioneHelp = StartCoroutine(AnimaChiudiHelp());
-    }
-
-    IEnumerator AnimaApriHelp()
-    {
-        RectTransform rect = pannelloHelp.GetComponent<RectTransform>();
-        CanvasGroup gruppo = pannelloHelp.GetComponent<CanvasGroup>();
-        if (rect == null) yield break;
-        if (gruppo == null) gruppo = pannelloHelp.AddComponent<CanvasGroup>();
-        rect.localScale = Vector3.one * 0.5f;
-        gruppo.alpha = 0f;
-        float tempo = 0f;
-        while (tempo < 0.25f)
-        {
-            tempo += Time.deltaTime;
-            float t = Mathf.Clamp01(tempo / 0.25f);
-            float curva = Mathf.Sin(t * Mathf.PI * 0.5f);
-            rect.localScale = Vector3.Lerp(Vector3.one * 0.5f, Vector3.one * 1.08f, curva);
-            gruppo.alpha = t;
-            yield return null;
-        }
-        rect.localScale = Vector3.one;
-        gruppo.alpha = 1f;
-    }
-
-    IEnumerator AnimaChiudiHelp()
-    {
-        RectTransform rect = pannelloHelp.GetComponent<RectTransform>();
-        CanvasGroup gruppo = pannelloHelp.GetComponent<CanvasGroup>();
-        if (rect == null) yield break;
-        if (gruppo == null) gruppo = pannelloHelp.AddComponent<CanvasGroup>();
-        Vector3 scalaIniziale = rect.localScale;
-        float tempo = 0f;
-        while (tempo < 0.15f)
-        {
-            tempo += Time.deltaTime;
-            float t = Mathf.Clamp01(tempo / 0.15f);
-            rect.localScale = Vector3.Lerp(scalaIniziale, Vector3.zero, t);
-            gruppo.alpha = 1f - t;
-            yield return null;
-        }
-        pannelloHelp.SetActive(false);
-        rect.localScale = Vector3.one;
-        gruppo.alpha = 1f;
+        animazioneHelp = StartCoroutine(MenuManager.AnimaPannelloHelp(pannelloHelp, false));
     }
 }
