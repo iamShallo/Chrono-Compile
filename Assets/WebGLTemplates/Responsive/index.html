@@ -12,17 +12,6 @@
       <div id="unity-loading-bar">
         <div id="unity-progress-bar"><div id="unity-progress-bar-full"></div></div>
       </div>
-      <section id="creator-splash" aria-label="Crediti">
-        <div class="creator-card">
-          <p class="creator-label">Made by</p>
-          <a class="creator-profile" href="https://github.com/iamShallo" target="_blank" rel="noreferrer">
-            <img class="creator-avatar" src="https://avatars.githubusercontent.com/u/148480520?v=4&amp;s=256" alt="Avatar GitHub di Francesco Caldarelli">
-            <span class="creator-name">Francesco Caldarelli</span>
-            <span class="creator-supervisor">Supervisor: Prof. Fabrizio Fornari</span>
-            <span class="creator-handle">@iamShallo</span>
-          </a>
-        </div>
-      </section>
       <div id="unity-warning"></div>
     </main>
     <script>
@@ -66,12 +55,6 @@
           document.querySelector("#unity-progress-bar-full").style.width = `${progress * 100}%`;
         }).then(() => {
           document.querySelector("#unity-loading-bar").style.display = "none";
-          const creatorSplash = document.querySelector("#creator-splash");
-          requestAnimationFrame(() => creatorSplash.classList.add("is-visible"));
-          window.setTimeout(() => {
-            creatorSplash.classList.remove("is-visible");
-            window.setTimeout(() => creatorSplash.remove(), 500);
-          }, 7000);
         }).catch((message) => {
           unityShowBanner(message, "error");
         });
