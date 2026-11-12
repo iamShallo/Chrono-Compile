@@ -27,29 +27,6 @@ body {
   background: #000;
 }
 
-#unity-loading-bar {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(240px, 60vw);
-  transform: translate(-50%, -50%);
-}
-
-#unity-progress-bar {
-  height: 8px;
-  overflow: hidden;
-  border: 1px solid #21c5da;
-  border-radius: 4px;
-  background: #171717;
-}
-
-#unity-progress-bar-full {
-  width: 0;
-  height: 100%;
-  background: #21c5da;
-  transition: width 0.15s linear;
-}
-
 #creator-splash {
   position: absolute;
   inset: 0;

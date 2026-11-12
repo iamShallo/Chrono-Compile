@@ -9,9 +9,6 @@
   <body>
     <main id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" width="{{{ WIDTH }}}" height="{{{ HEIGHT }}}" tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-progress-bar"><div id="unity-progress-bar-full"></div></div>
-      </div>
       <section id="creator-splash" aria-label="Crediti">
         <div class="creator-card">
           <p class="creator-label">Made by</p>
@@ -58,14 +55,10 @@
         canvas.className = "unity-mobile";
       }
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
       const loader = document.createElement("script");
       loader.src = buildUrl + "/{{{ LOADER_FILENAME }}}";
       loader.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = `${progress * 100}%`;
-        }).then(() => {
-          document.querySelector("#unity-loading-bar").style.display = "none";
+        createUnityInstance(canvas, config).then(() => {
           const creatorSplash = document.querySelector("#creator-splash");
           requestAnimationFrame(() => creatorSplash.classList.add("is-visible"));
           window.setTimeout(() => {
