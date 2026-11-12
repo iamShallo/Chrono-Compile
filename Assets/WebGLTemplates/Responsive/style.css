@@ -107,6 +107,11 @@ body {
   font-weight: 700;
 }
 
+.creator-supervisor {
+  color: #d7e5ed;
+  font-size: clamp(14px, 2.2vw, 19px);
+}
+
 .creator-handle {
   color: #a9bfce;
   font-size: clamp(14px, 2vw, 18px);
