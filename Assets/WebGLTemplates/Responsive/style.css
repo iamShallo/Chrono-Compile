@@ -50,6 +50,68 @@ body {
   transition: width 0.15s linear;
 }
 
+#creator-splash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(ellipse at center, #112b46 0%, #050a12 72%);
+  color: #fff;
+  font-family: Arial, sans-serif;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#creator-splash.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.creator-card {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.creator-label {
+  margin: 0;
+  color: #21c5da;
+  font-size: clamp(14px, 2vw, 20px);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.creator-profile {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.creator-avatar {
+  width: clamp(76px, 12vw, 112px);
+  aspect-ratio: 1;
+  border: 3px solid #21c5da;
+  border-radius: 50%;
+  box-shadow: 0 0 28px rgb(33 197 218 / 35%);
+}
+
+.creator-name {
+  font-size: clamp(18px, 3vw, 28px);
+  font-weight: 700;
+}
+
+.creator-handle {
+  color: #a9bfce;
+  font-size: clamp(14px, 2vw, 18px);
+}
+
 #unity-warning {
   position: absolute;
   top: 5%;
@@ -72,4 +134,10 @@ body {
 .unity-mobile #unity-canvas {
   width: min(100vw, 177.7778vh);
   height: min(100vh, 56.25vw);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #creator-splash {
+    transition: none;
+  }
 }
