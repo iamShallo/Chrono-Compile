@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>{{{ PRODUCT_NAME }}}</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width="{{{ WIDTH }}}" height="{{{ HEIGHT }}}" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-progress-bar"><div id="unity-progress-bar-full"></div></div>
+      </div>
+      <div id="unity-warning"></div>
+    </main>
+    <script>
+      const canvas = document.querySelector("#unity-canvas");
+      const container = document.querySelector("#unity-container");
+
+      function unityShowBanner(message, type) {
+        const warning = document.querySelector("#unity-warning");
+        warning.textContent = message;
+        warning.className = type || "";
+        warning.style.display = "block";
+        if (type !== "error") {
+          setTimeout(() => {
+            warning.style.display = "none";
+          }, 5000);
+        }
+      }
+
+      const buildUrl = "Build";
+      const config = {
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "{{{ COMPANY_NAME }}}",
+        productName: "{{{ PRODUCT_NAME }}}",
+        productVersion: "{{{ PRODUCT_VERSION }}}",
+        showBanner: unityShowBanner
+      };
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
+      }
+
+      document.querySelector("#unity-loading-bar").style.display = "block";
+      const loader = document.createElement("script");
+      loader.src = buildUrl + "/{{{ LOADER_FILENAME }}}";
+      loader.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width = `${progress * 100}%`;
+        }).then(() => {
+          document.querySelector("#unity-loading-bar").style.display = "none";
+        }).catch((message) => {
+          unityShowBanner(message, "error");
+        });
+      };
+      document.body.appendChild(loader);
+    </script>
+  </body>
+</html>
