@@ -581,6 +581,8 @@ public class Livello2Manager : MonoBehaviour
     {
         if (casellaTesto == null) yield break;
         casellaTesto.text = "";
+        if (terminaleLog != null)
+            terminaleLog.text = "> SCRITTURA IN CORSO...\n> TIENI PREMUTO SPAZIO O IL TASTO SINISTRO DEL MOUSE PER ACCELERARE.";
         bool isRichTextTag = false;
 
         foreach (char lettera in testoCompleto.ToCharArray())
@@ -590,7 +592,11 @@ public class Livello2Manager : MonoBehaviour
             if (lettera == '>') isRichTextTag = false;
 
             if (!isRichTextTag)
-                yield return new WaitForSeconds(ritardoLettera);
+            {
+                bool accelera = (Keyboard.current != null && Keyboard.current.spaceKey.isPressed) ||
+                    (Mouse.current != null && Mouse.current.leftButton.isPressed);
+                yield return new WaitForSeconds(accelera ? ritardoLettera * 0.1f : ritardoLettera);
+            }
         }
     }
 

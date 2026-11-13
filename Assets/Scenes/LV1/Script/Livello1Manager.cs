@@ -131,6 +131,7 @@ public class Livello1Manager : MonoBehaviour
         if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn && levaOutput.isOn)
         {
             schermoTerminale.text = ">>> CICLO DI VON NEUMANN COMPLETATO <<<\n[POWER: ON] -> DATI CARICATI [X=12, Y=5]\n[ALU]: ADD(12, 5) = 17\n[OUTPUT]: STAMPATO SU CARTA PERFORATA [17]\n\nSUCCESS! LETTURA RISULTATO IN CORSO...";
+            StartCoroutine(FeedbackSuccessoVisivo());
             GameAnalytics.SbloccaAchievement(1, 1);
             StartCoroutine(AvanzaBarraTemporale(0.33f));
             StartCoroutine(PassaggioFase(StatoTask.Media, 9f));
@@ -167,6 +168,7 @@ public class Livello1Manager : MonoBehaviour
         if (levaPower.isOn && levaInputA.isOn && levaInputB.isOn && levaProcess.isOn && levaLoopExecute.isOn)
         {
             schermoTerminale.text = ">>> SALTO CONDIZIONATO ESEGUITO <<<\n[ALU]: 10 + (-15) = -5\n[FLAG NEGATIVO ATTIVO]: Rilevato numero minore di zero.\n[EXECUTE]: Salto logico attivato -> STAMPA SALTATA CON SUCCESSO!\n\nSUCCESS! ANALISI DEL SALTO IN CORSO...";
+            StartCoroutine(FeedbackSuccessoVisivo());
             GameAnalytics.SbloccaAchievement(1, 2);
             StartCoroutine(AvanzaBarraTemporale(0.66f));
             StartCoroutine(PassaggioFase(StatoTask.Difficile, 9f));
@@ -275,6 +277,7 @@ public class Livello1Manager : MonoBehaviour
         GameAnalytics.CompletaLivello(1);
         GameAnalytics.SbloccaAchievement(1, 3);
         schermoTerminale.text = $"[SEQUENZA HARDWARE COMPLETATA]\nVALORE FINALE ACCUMULATORE: {accumulatore}\n\n>>> ERA ANNI '40-'50 COMPLETATA.\n<color=#00FF66>PREMI SUBMIT PER AVVIARE IL SALTO ALL'ERA SUCCESSIVA.</color>";
+        StartCoroutine(FeedbackSuccessoVisivo());
 
         if (immagineBottoneSubmit != null)
         {
@@ -397,6 +400,30 @@ public class Livello1Manager : MonoBehaviour
         yield return new WaitForSeconds(3.65f);
         schermoTerminale.text = (levaStatus != null && levaStatus.isOn) ? "[DISPLAY: ONLINE]\nPOWER: OFFLINE\nMEM: NULL\nALU: SLEEP\n\nAWAITING POWER..." : "";
         inTransizione = false;
+    }
+
+    IEnumerator FeedbackSuccessoVisivo()
+    {
+        if (schermoTerminale == null) yield break;
+
+        Color coloreOriginale = schermoTerminale.color;
+        RectTransform rettangolo = schermoTerminale.rectTransform;
+        Vector3 scalaOriginale = rettangolo.localScale;
+        float tempo = 0f;
+        const float durata = 0.45f;
+
+        while (tempo < durata)
+        {
+            tempo += Time.deltaTime;
+            float t = Mathf.Clamp01(tempo / durata);
+            float impulso = Mathf.Sin(t * Mathf.PI);
+            schermoTerminale.color = Color.Lerp(coloreOriginale, new Color(0.35f, 1f, 0.55f, coloreOriginale.a), impulso);
+            rettangolo.localScale = scalaOriginale * (1f + impulso * 0.035f);
+            yield return null;
+        }
+
+        schermoTerminale.color = coloreOriginale;
+        rettangolo.localScale = scalaOriginale;
     }
 
     IEnumerator EffettoSfarfallioValvole()

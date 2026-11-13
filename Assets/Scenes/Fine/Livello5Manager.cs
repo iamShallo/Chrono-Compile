@@ -15,15 +15,72 @@ public class Livello5Manager : MonoBehaviour
 
     void Start()
     {
-        if (testoStatistiche != null) testoStatistiche.text = GameAnalytics.OttieniReportFinale();
-        if (testoAchievement != null && testoAchievement != testoStatistiche)
-            testoAchievement.text = GameAnalytics.OttieniReportAchievementFinale();
+        Livello5Manager[] managerSulLivello = GetComponents<Livello5Manager>();
+        if (managerSulLivello.Length > 0 && managerSulLivello[0] != this) return;
+
         MenuManager.ConfiguraTestoAccessibilitaCompatto(testoStatistiche);
         MenuManager.ConfiguraTestoAccessibilitaCompatto(testoAchievement);
-        if (pannelloAchievement != null) pannelloAchievement.SetActive(true);
+        if (testoStatistiche != null) testoStatistiche.text = "";
+        if (testoAchievement != null && testoAchievement != testoStatistiche) testoAchievement.text = "";
+        if (pannelloAchievement != null)
+            pannelloAchievement.SetActive(testoAchievement == testoStatistiche);
         if (bottoneTornaMenu != null) bottoneTornaMenu.onClick.AddListener(TornaAlMenu);
+        StartCoroutine(MostraRisultatiAnimati());
         // Avvia il fade-in morbido da schermo nero appena entri nel LV5
         if (pannelloTransizione != null) StartCoroutine(EffettoFadeIn());
+    }
+
+    IEnumerator MostraRisultatiAnimati()
+    {
+        yield return StartCoroutine(MostraTestoProgressivamente(testoStatistiche, GameAnalytics.OttieniReportFinale()));
+
+        if (pannelloAchievement != null)
+        {
+            pannelloAchievement.SetActive(true);
+            pannelloAchievement.transform.localScale = Vector3.one * 0.82f;
+            yield return StartCoroutine(EffettoCelebrazioneDiscreta(pannelloAchievement.transform));
+        }
+
+        if (testoAchievement != null && testoAchievement != testoStatistiche)
+            yield return StartCoroutine(MostraTestoProgressivamente(testoAchievement, GameAnalytics.OttieniReportAchievementFinale()));
+    }
+
+    IEnumerator MostraTestoProgressivamente(TextMeshProUGUI testo, string contenuto)
+    {
+        if (testo == null) yield break;
+
+        testo.text = contenuto;
+        testo.maxVisibleCharacters = 0;
+        testo.ForceMeshUpdate();
+        int caratteriTotali = testo.textInfo.characterCount;
+        for (int carattere = 1; carattere <= caratteriTotali; carattere++)
+        {
+            testo.maxVisibleCharacters = carattere;
+            yield return new WaitForSeconds(0.018f);
+        }
+
+        testo.maxVisibleCharacters = int.MaxValue;
+    }
+
+    IEnumerator EffettoCelebrazioneDiscreta(Transform pannello)
+    {
+        if (pannello == null) yield break;
+
+        Vector3 scalaFinale = Vector3.one;
+        float tempo = 0f;
+        const float durata = 0.42f;
+        while (tempo < durata)
+        {
+            tempo += Time.deltaTime;
+            float t = Mathf.Clamp01(tempo / durata);
+            float scala = t < 0.7f
+                ? Mathf.Lerp(0.82f, 1.04f, t / 0.7f)
+                : Mathf.Lerp(1.04f, 1f, (t - 0.7f) / 0.3f);
+            pannello.localScale = scalaFinale * scala;
+            yield return null;
+        }
+
+        pannello.localScale = scalaFinale;
     }
 
     // ==========================================

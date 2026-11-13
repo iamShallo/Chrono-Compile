@@ -269,16 +269,26 @@ public class Livello3Manager : MonoBehaviour
     {
         if (oggettoUI == null) yield break;
         Vector3 scalaOriginale = oggettoUI.localScale;
-        oggettoUI.localScale = scalaOriginale * 0.5f;
+        Image immagine = oggettoUI.GetComponent<Image>();
+        Color coloreOriginale = immagine != null ? immagine.color : Color.white;
+        const float durata = 0.32f;
         float tempo = 0f;
-        while (tempo < 1f)
+
+        while (tempo < durata)
         {
-            tempo += Time.deltaTime * 8f;
-            float curva = Mathf.Sin(Mathf.Clamp01(tempo) * Mathf.PI * 0.5f);
-            oggettoUI.localScale = Vector3.Lerp(scalaOriginale * 0.5f, scalaOriginale * 1.15f, curva);
+            tempo += Time.deltaTime;
+            float t = Mathf.Clamp01(tempo / durata);
+            float scala = t < 0.65f
+                ? Mathf.Lerp(0.78f, 1.12f, t / 0.65f)
+                : Mathf.Lerp(1.12f, 1f, (t - 0.65f) / 0.35f);
+            oggettoUI.localScale = scalaOriginale * scala;
+            if (immagine != null)
+                immagine.color = Color.Lerp(coloreOriginale, Color.white, Mathf.Sin(t * Mathf.PI) * 0.3f);
             yield return null;
         }
+
         oggettoUI.localScale = scalaOriginale;
+        if (immagine != null) immagine.color = coloreOriginale;
     }
 
     void AggiornaAnteprimaCodice()
@@ -309,7 +319,7 @@ public class Livello3Manager : MonoBehaviour
             case TipoBlocco.Add: return "<color=#ff5555>int</color> result = a + b;";
             case TipoBlocco.Output: return "<color=#55ff55>System.out.println</color>(result);";
             case TipoBlocco.BivioY: return "<color=#aa55ff>if</color> (result > 0) { ... } <color=#aa55ff>else</color> { ... }";
-            case TipoBlocco.LoopAnello: return "<color=#ffaa00>while</color> (i < 3) {"; // Il loop apre la parentesi graffa dello scope
+            case TipoBlocco.LoopAnello: return "int i = 0;\n        <color=#ffaa00>while</color> (i < 3) {"; // Il loop apre la parentesi graffa dello scope
             case TipoBlocco.Increment: return "    i++;\n        }"; // L'incremento chiude lo scope
             case TipoBlocco.Vuoto: return "<color=#555555>// ...</color>";
             default: return "";
@@ -366,8 +376,19 @@ public class Livello3Manager : MonoBehaviour
             GameAnalytics.RegistraErrore();
             StartCoroutine(EffettoScreenShake());
             StartCoroutine(FlashRosso(immagineBottoneCheck, coloreOriginaleCheck));
+            StartCoroutine(FeedbackErroreConsole());
             if (logConsole != null) logConsole.text = logTesto;
         }
+    }
+
+    IEnumerator FeedbackErroreConsole()
+    {
+        if (logConsole == null) yield break;
+
+        Color coloreOriginale = logConsole.color;
+        logConsole.color = new Color(1f, 0.38f, 0.32f, coloreOriginale.a);
+        yield return new WaitForSeconds(0.65f);
+        logConsole.color = coloreOriginale;
     }
 
     IEnumerator RoutineTestMultiPiattaforma()
